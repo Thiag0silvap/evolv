@@ -1,0 +1,6 @@
+{
+  "name": "Evolv",
+  "description": "Plataforma inteligente para rastrear sua evolução profissional, projetos, competências e gerar currículos baseados em dados reais.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
