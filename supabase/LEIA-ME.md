@@ -1,0 +1,1 @@
+Antes de testar: (1) cole o conteúdo de schema.sql no SQL Editor do painel do Supabase e execute; (2) preencha VITE_SUPABASE_ANON_KEY em .env.local com a Publishable key do projeto (Settings > API Keys).

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
+import type { Session } from "@supabase/supabase-js";
 import { Experience, Project } from "./types";
-import { initialExperiences, initialProjects } from "./data";
+import { supabase } from "./supabaseClient";
+import Auth from "./components/Auth";
 import Dashboard from "./components/Dashboard";
 import Experiences from "./components/Experiences";
 import Projects from "./components/Projects";
@@ -9,24 +11,27 @@ import Timeline from "./components/Timeline";
 import Resume from "./components/Resume";
 import LinkedIn from "./components/LinkedIn";
 import PrdView from "./components/PrdView";
-import { 
-  Briefcase, 
-  Layers, 
-  Award, 
-  Calendar, 
-  FileText, 
-  Linkedin, 
-  Sparkles, 
-  LayoutDashboard, 
-  Menu, 
+import {
+  Briefcase,
+  Layers,
+  Award,
+  FileText,
+  Linkedin,
+  Sparkles,
+  LayoutDashboard,
+  Menu,
   X,
-  RotateCcw,
+  LogOut,
   BookOpen,
   Milestone
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
 export default function App() {
+  // Auth session
+  const [session, setSession] = useState<Session | null>(null);
+  const [isCheckingSession, setIsCheckingSession] = useState(true);
+
   // Navigation active tab
   const [activeTab, setActiveTab] = useState<string>("dashboard");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -35,84 +40,125 @@ export default function App() {
   const [experiences, setExperiences] = useState<Experience[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
 
-  // Load from local storage or seed
+  // Watch auth session
   useEffect(() => {
-    const storedExps = localStorage.getItem("evolv_experiences");
-    const storedProjs = localStorage.getItem("evolv_projects");
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session);
+      setIsCheckingSession(false);
+    });
 
-    if (storedExps) {
-      setExperiences(JSON.parse(storedExps));
-    } else {
-      setExperiences(initialExperiences);
-      localStorage.setItem("evolv_experiences", JSON.stringify(initialExperiences));
-    }
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      setSession(newSession);
+    });
 
-    if (storedProjs) {
-      setProjects(JSON.parse(storedProjs));
-    } else {
-      setProjects(initialProjects);
-      localStorage.setItem("evolv_projects", JSON.stringify(initialProjects));
-    }
+    return () => listener.subscription.unsubscribe();
   }, []);
 
-  // Save changes helper
-  const saveExperiences = (newExps: Experience[]) => {
-    setExperiences(newExps);
-    localStorage.setItem("evolv_experiences", JSON.stringify(newExps));
-  };
+  // Load experiences/projects from Supabase whenever the session changes
+  useEffect(() => {
+    if (!session) {
+      setExperiences([]);
+      setProjects([]);
+      return;
+    }
 
-  const saveProjects = (newProjs: Project[]) => {
-    setProjects(newProjs);
-    localStorage.setItem("evolv_projects", JSON.stringify(newProjs));
-  };
+    (async () => {
+      const [expResult, projResult] = await Promise.all([
+        supabase.from("experiences").select("*").order("date", { ascending: false }),
+        supabase.from("projects").select("*"),
+      ]);
+
+      if (expResult.error) alert(expResult.error.message);
+      if (projResult.error) alert(projResult.error.message);
+
+      setExperiences((expResult.data as Experience[]) || []);
+      setProjects((projResult.data as Project[]) || []);
+    })();
+  }, [session]);
 
   // Operations: Experience CRUD
-  const handleAddExperience = (newExpData: Omit<Experience, "id">) => {
-    const newExp: Experience = {
-      id: `exp-${Date.now()}`,
-      ...newExpData
-    };
-    saveExperiences([newExp, ...experiences]);
-  };
-
-  const handleUpdateExperience = (updatedExp: Experience) => {
-    saveExperiences(experiences.map(e => e.id === updatedExp.id ? updatedExp : e));
-  };
-
-  const handleDeleteExperience = (id: string) => {
-    if (confirm("Tem certeza que deseja remover esta experiência?")) {
-      saveExperiences(experiences.filter(e => e.id !== id));
+  const handleAddExperience = async (newExpData: Omit<Experience, "id">) => {
+    if (!session) return;
+    const { data, error } = await supabase
+      .from("experiences")
+      .insert({ ...newExpData, user_id: session.user.id })
+      .select()
+      .single();
+    if (error) {
+      alert(error.message);
+      return;
     }
+    setExperiences([data as Experience, ...experiences]);
+  };
+
+  const handleUpdateExperience = async (updatedExp: Experience) => {
+    const { id, ...fields } = updatedExp;
+    const { data, error } = await supabase
+      .from("experiences")
+      .update(fields)
+      .eq("id", id)
+      .select()
+      .single();
+    if (error) {
+      alert(error.message);
+      return;
+    }
+    setExperiences(experiences.map(e => (e.id === id ? (data as Experience) : e)));
+  };
+
+  const handleDeleteExperience = async (id: string) => {
+    if (!confirm("Tem certeza que deseja remover esta experiência?")) return;
+    const { error } = await supabase.from("experiences").delete().eq("id", id);
+    if (error) {
+      alert(error.message);
+      return;
+    }
+    setExperiences(experiences.filter(e => e.id !== id));
   };
 
   // Operations: Projects CRUD
-  const handleAddProject = (newProjData: Omit<Project, "id">) => {
-    const newProj: Project = {
-      id: `proj-${Date.now()}`,
-      ...newProjData
-    };
-    saveProjects([newProj, ...projects]);
-  };
-
-  const handleUpdateProject = (updatedProj: Project) => {
-    saveProjects(projects.map(p => p.id === updatedProj.id ? updatedProj : p));
-  };
-
-  const handleDeleteProject = (id: string) => {
-    if (confirm("Tem certeza que deseja remover este projeto?")) {
-      saveProjects(projects.filter(p => p.id !== id));
+  const handleAddProject = async (newProjData: Omit<Project, "id">) => {
+    if (!session) return;
+    const { data, error } = await supabase
+      .from("projects")
+      .insert({ ...newProjData, user_id: session.user.id })
+      .select()
+      .single();
+    if (error) {
+      alert(error.message);
+      return;
     }
+    setProjects([data as Project, ...projects]);
   };
 
-  // Reset/Restore seed data
-  const handleResetData = () => {
-    if (confirm("Deseja restaurar as experiências e projetos originais do Thiago? Quaisquer dados novos criados serão apagados.")) {
-      setExperiences(initialExperiences);
-      setProjects(initialProjects);
-      localStorage.setItem("evolv_experiences", JSON.stringify(initialExperiences));
-      localStorage.setItem("evolv_projects", JSON.stringify(initialProjects));
-      setActiveTab("dashboard");
+  const handleUpdateProject = async (updatedProj: Project) => {
+    const { id, ...fields } = updatedProj;
+    const { data, error } = await supabase
+      .from("projects")
+      .update(fields)
+      .eq("id", id)
+      .select()
+      .single();
+    if (error) {
+      alert(error.message);
+      return;
     }
+    setProjects(projects.map(p => (p.id === id ? (data as Project) : p)));
+  };
+
+  const handleDeleteProject = async (id: string) => {
+    if (!confirm("Tem certeza que deseja remover este projeto?")) return;
+    const { error } = await supabase.from("projects").delete().eq("id", id);
+    if (error) {
+      alert(error.message);
+      return;
+    }
+    setProjects(projects.filter(p => p.id !== id));
+  };
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    setActiveTab("dashboard");
   };
 
   // Tab definitions
@@ -127,12 +173,24 @@ export default function App() {
     { id: "prd", label: "Documento PRD", icon: <BookOpen className="w-4 h-4" /> },
   ];
 
+  if (isCheckingSession) {
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-500 flex items-center justify-center text-xs uppercase tracking-widest font-bold">
+        Carregando...
+      </div>
+    );
+  }
+
+  if (!session) {
+    return <Auth />;
+  }
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col md:flex-row font-sans">
-      
+
       {/* Sidebar Navigation - Desktop */}
       <aside className="hidden md:flex flex-col justify-between w-64 bg-slate-900 border-r border-slate-850 shrink-0 p-5 sticky top-0 h-screen z-20">
-        
+
         <div className="space-y-8">
           {/* Logo Brand Title */}
           <div className="flex items-center gap-2.5 px-2">
@@ -146,11 +204,15 @@ export default function App() {
           {/* User Profile Badge */}
           <div className="px-3 py-2.5 bg-slate-950/40 border border-slate-800/80 rounded-xl flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-slate-850 border border-white/10 flex items-center justify-center text-xs font-bold text-emerald-400 shrink-0">
-              TP
+              {(session.user.user_metadata?.name || session.user.email || "?").charAt(0).toUpperCase()}
             </div>
             <div className="min-w-0">
-              <p className="text-[11px] text-slate-300 font-bold uppercase tracking-wider truncate leading-none">Thiago da Silva Pereira</p>
-              <p className="text-[9px] text-slate-500 truncate mt-1">Analista de TI & Automações</p>
+              <p className="text-[11px] text-slate-300 font-bold uppercase tracking-wider truncate leading-none">
+                {session.user.user_metadata?.name || session.user.email}
+              </p>
+              <p className="text-[9px] text-slate-500 truncate mt-1">
+                {session.user.user_metadata?.title || session.user.email}
+              </p>
             </div>
           </div>
 
@@ -176,14 +238,14 @@ export default function App() {
         {/* Footer actions inside Sidebar */}
         <div className="space-y-4 pt-5 border-t border-slate-850/80">
           <button
-            onClick={handleResetData}
+            onClick={handleSignOut}
             className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg bg-slate-950/60 hover:bg-red-950/20 text-slate-500 hover:text-red-400 border border-slate-850 hover:border-red-950/40 text-[10px] font-bold uppercase tracking-wider transition-all"
-            title="Restaurar dados originais"
+            title="Sair da conta"
           >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span>Restaurar Dados</span>
+            <LogOut className="w-3.5 h-3.5" />
+            <span>Sair</span>
           </button>
-          
+
           <div className="text-[10px] text-slate-600 text-center font-mono">
             Evolv Professional v1.0.0
           </div>
@@ -199,7 +261,7 @@ export default function App() {
           </span>
           <span className="text-lg font-black text-white tracking-widest font-mono">EVOLV</span>
         </div>
-        
+
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           className="p-2 bg-slate-800 text-slate-300 rounded-lg hover:text-white focus:outline-none"
@@ -239,13 +301,13 @@ export default function App() {
             <div className="pt-2 border-t border-slate-850 flex items-center justify-between gap-4">
               <button
                 onClick={() => {
-                  handleResetData();
+                  handleSignOut();
                   setMobileMenuOpen(false);
                 }}
                 className="flex items-center gap-1.5 text-slate-500 hover:text-red-400 text-[10px] font-bold uppercase tracking-wider transition-colors"
               >
-                <RotateCcw className="w-3.5 h-3.5" />
-                <span>Restaurar Dados</span>
+                <LogOut className="w-3.5 h-3.5" />
+                <span>Sair</span>
               </button>
               <span className="text-[9px] text-slate-600 font-mono">Evolv Career v1.0.0</span>
             </div>
@@ -265,13 +327,13 @@ export default function App() {
             className="min-h-[500px]"
           >
             {activeTab === "dashboard" && (
-              <Dashboard 
-                experiences={experiences} 
-                projects={projects} 
-                onNavigate={(tab) => setActiveTab(tab)} 
+              <Dashboard
+                experiences={experiences}
+                projects={projects}
+                onNavigate={(tab) => setActiveTab(tab)}
               />
             )}
-            
+
             {activeTab === "experiences" && (
               <Experiences
                 experiences={experiences}
