@@ -105,10 +105,6 @@ export default function Dashboard({ experiences, projects, userName, onNavigate 
         
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
-            <div className="flex items-center gap-2 px-3 py-1 bg-violet-900/40 border border-violet-800/30 text-violet-300 text-xs font-semibold rounded-full w-max">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Sprint 0 • Ativa</span>
-            </div>
             <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">
               Olá, {userName || "bem-vindo"} 👋
             </h1>

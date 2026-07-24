@@ -41,5 +41,11 @@
   ::-webkit-scrollbar-thumb:hover {
     background: #30363D;
   }
+
+  /* Native date picker icon renders black by default — invisible on dark theme */
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
+  }
 }
 

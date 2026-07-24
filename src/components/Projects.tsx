@@ -162,7 +162,7 @@ export default function Projects({ projects, onAddProject, onDeleteProject, onUp
                     key={s}
                     type="button"
                     onClick={() => setStatus(s)}
-                    className={`py-1.5 border text-[10px] font-bold tracking-wider uppercase rounded-md transition-all ${
+                    className={`min-h-[2.75rem] px-1 py-1.5 flex items-center justify-center text-center border text-[9px] font-bold tracking-tight uppercase leading-tight rounded-md transition-all ${
                       status === s
                         ? "bg-violet-900/30 text-violet-400 border-violet-800"
                         : "bg-slate-950 text-slate-400 border-slate-850 hover:border-slate-800"

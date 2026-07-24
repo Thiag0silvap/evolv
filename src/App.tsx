@@ -35,6 +35,7 @@ export default function App() {
   // Navigation active tab
   const [activeTab, setActiveTab] = useState<string>("dashboard");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   // Application database states
   const [experiences, setExperiences] = useState<Experience[]>([]);
@@ -166,14 +167,14 @@ export default function App() {
 
   // Tab definitions
   const tabs = [
-    { id: "dashboard", label: "Dashboard", icon: <LayoutDashboard className="w-4 h-4" /> },
-    { id: "experiences", label: "Experiências", icon: <Layers className="w-4 h-4" /> },
-    { id: "projects", label: "Projetos", icon: <Briefcase className="w-4 h-4" /> },
-    { id: "skills", label: "Habilidades", icon: <Award className="w-4 h-4" /> },
-    { id: "timeline", label: "Linha do Tempo", icon: <Milestone className="w-4 h-4" /> },
-    { id: "resume", label: "Currículo", icon: <FileText className="w-4 h-4" /> },
-    { id: "linkedin", label: "LinkedIn", icon: <Linkedin className="w-4 h-4" /> },
-    { id: "prd", label: "Documento PRD", icon: <BookOpen className="w-4 h-4" /> },
+    { id: "dashboard", label: "Dashboard", icon: <LayoutDashboard className="w-4 h-4 shrink-0" /> },
+    { id: "experiences", label: "Experiências", icon: <Layers className="w-4 h-4 shrink-0" /> },
+    { id: "projects", label: "Projetos", icon: <Briefcase className="w-4 h-4 shrink-0" /> },
+    { id: "skills", label: "Habilidades", icon: <Award className="w-4 h-4 shrink-0" /> },
+    { id: "timeline", label: "Linha do Tempo", icon: <Milestone className="w-4 h-4 shrink-0" /> },
+    { id: "resume", label: "Currículo", icon: <FileText className="w-4 h-4 shrink-0" /> },
+    { id: "linkedin", label: "LinkedIn", icon: <Linkedin className="w-4 h-4 shrink-0" /> },
+    { id: "prd", label: "Documento PRD", icon: <BookOpen className="w-4 h-4 shrink-0" /> },
   ];
 
   if (isCheckingSession) {
@@ -192,31 +193,43 @@ export default function App() {
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col md:flex-row font-sans">
 
       {/* Sidebar Navigation - Desktop */}
-      <aside className="hidden md:flex flex-col justify-between w-64 bg-slate-900 border-r border-slate-850 shrink-0 p-5 sticky top-0 h-screen z-20">
+      <aside
+        className={`hidden md:flex flex-col ${sidebarCollapsed ? "w-20" : "w-64"} bg-slate-900 border-r border-slate-850 shrink-0 p-5 sticky top-0 h-screen z-20 transition-all duration-200`}
+      >
 
-        <div className="space-y-8">
-          {/* Logo Brand Title */}
-          <div className="flex items-center gap-2.5 px-2">
-            <div className="w-8 h-8 bg-emerald-600 rounded flex items-center justify-center font-bold text-white shadow-[0_0_15px_rgba(79,70,229,0.4)]">E</div>
-            <div>
-              <span className="text-lg font-bold text-white tracking-tight font-sans">EVOLV <span className="text-emerald-400 font-light italic text-xs">Beta 0.1</span></span>
-              <span className="block text-[9px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Sprint 0 — Discovery</span>
-            </div>
-          </div>
+        {/* Scrollable top area: logo, profile, nav */}
+        <div className="flex-1 min-h-0 overflow-y-auto space-y-8">
+          {/* Logo Brand Title — clickable to collapse/expand the sidebar */}
+          <button
+            type="button"
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            title={sidebarCollapsed ? "Expandir menu" : "Recolher menu"}
+            className={`w-full flex items-center ${sidebarCollapsed ? "justify-center" : "gap-2.5"} px-2 cursor-pointer hover:opacity-80 active:scale-95 transition-all`}
+          >
+            <div className="w-8 h-8 bg-emerald-600 rounded flex items-center justify-center font-bold text-white shadow-[0_0_15px_rgba(79,70,229,0.4)] shrink-0">E</div>
+            {!sidebarCollapsed && (
+              <span className="text-lg font-bold text-white tracking-tight font-sans">EVOLV</span>
+            )}
+          </button>
 
           {/* User Profile Badge */}
-          <div className="px-3 py-2.5 bg-slate-950/40 border border-slate-800/80 rounded-xl flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-slate-850 border border-white/10 flex items-center justify-center text-xs font-bold text-emerald-400 shrink-0">
+          <div className={`py-2.5 bg-slate-950/40 border border-slate-800/80 rounded-xl flex items-center gap-3 ${sidebarCollapsed ? "justify-center px-2" : "px-3"}`}>
+            <div
+              className="w-8 h-8 rounded-full bg-slate-850 border border-white/10 flex items-center justify-center text-xs font-bold text-emerald-400 shrink-0"
+              title={sidebarCollapsed ? userName : undefined}
+            >
               {(userName || "?").charAt(0).toUpperCase()}
             </div>
-            <div className="min-w-0">
-              <p className="text-[11px] text-slate-300 font-bold uppercase tracking-wider truncate leading-none">
-                {userName}
-              </p>
-              <p className="text-[9px] text-slate-500 truncate mt-1">
-                {userTitle || session.user.email}
-              </p>
-            </div>
+            {!sidebarCollapsed && (
+              <div className="min-w-0">
+                <p className="text-[11px] text-slate-300 font-bold uppercase tracking-wider truncate leading-none">
+                  {userName}
+                </p>
+                <p className="text-[9px] text-slate-500 truncate mt-1">
+                  {userTitle || session.user.email}
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Nav List */}
@@ -225,33 +238,38 @@ export default function App() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
+                title={sidebarCollapsed ? tab.label : undefined}
                 className={`w-full flex items-center gap-3 px-3.5 py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
+                  sidebarCollapsed ? "justify-center" : ""
+                } ${
                   activeTab === tab.id
                     ? "bg-gradient-to-r from-emerald-950/50 to-emerald-900/10 text-emerald-400 border-l-4 border-emerald-500 shadow-sm"
                     : "text-slate-400 hover:text-white hover:bg-slate-850/50"
                 }`}
               >
                 {tab.icon}
-                <span>{tab.label}</span>
+                {!sidebarCollapsed && <span>{tab.label}</span>}
               </button>
             ))}
           </nav>
         </div>
 
-        {/* Footer actions inside Sidebar */}
-        <div className="space-y-4 pt-5 border-t border-slate-850/80">
+        {/* Footer actions inside Sidebar — always fully visible, outside the scroll area */}
+        <div className="shrink-0 space-y-4 pt-5 border-t border-slate-850/80">
           <button
             onClick={handleSignOut}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg bg-slate-950/60 hover:bg-red-950/20 text-slate-500 hover:text-red-400 border border-slate-850 hover:border-red-950/40 text-[10px] font-bold uppercase tracking-wider transition-all"
+            className={`w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg bg-slate-950/60 hover:bg-red-950/20 text-slate-500 hover:text-red-400 border border-slate-850 hover:border-red-950/40 text-[10px] font-bold uppercase tracking-wider transition-all`}
             title="Sair da conta"
           >
-            <LogOut className="w-3.5 h-3.5" />
-            <span>Sair</span>
+            <LogOut className="w-3.5 h-3.5 shrink-0" />
+            {!sidebarCollapsed && <span>Sair</span>}
           </button>
 
-          <div className="text-[10px] text-slate-600 text-center font-mono">
-            Evolv Professional v1.0.0
-          </div>
+          {!sidebarCollapsed && (
+            <div className="text-[10px] text-slate-600 text-center font-mono">
+              Evolv Professional v1.0.0
+            </div>
+          )}
         </div>
 
       </aside>
