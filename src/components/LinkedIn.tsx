@@ -17,9 +17,11 @@ import { motion, AnimatePresence } from "motion/react";
 
 interface LinkedInProps {
   experiences: Experience[];
+  userName: string;
+  userTitle?: string | null;
 }
 
-export default function LinkedIn({ experiences }: LinkedInProps) {
+export default function LinkedIn({ experiences, userName, userTitle }: LinkedInProps) {
   const [selectedExpId, setSelectedExpId] = useState<string>(
     experiences[0]?.id || ""
   );
@@ -191,10 +193,12 @@ export default function LinkedIn({ experiences }: LinkedInProps) {
             </div>
             <div className="min-w-0">
               <div className="text-sm font-extrabold text-white flex items-center gap-1">
-                <span>Thiago da Silva Pereira</span>
+                <span>{userName}</span>
                 <span className="text-[10px] bg-blue-950/50 text-blue-400 border border-blue-900/20 px-1 rounded">1º</span>
               </div>
-              <div className="text-[10px] text-slate-400 truncate">Analista de TI | Automatizador Python & SQL Server</div>
+              {userTitle && (
+                <div className="text-[10px] text-slate-400 truncate">{userTitle}</div>
+              )}
               <div className="text-[9px] text-slate-500">Agora mesmo • editado</div>
             </div>
           </div>

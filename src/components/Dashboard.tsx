@@ -1,11 +1,10 @@
 import React from "react";
 import { Experience, Project } from "../types";
 import { 
-  Briefcase, 
-  Layers, 
-  Award, 
-  Calendar, 
-  ArrowRight, 
+  Briefcase,
+  Layers,
+  Award,
+  ArrowRight,
   TrendingUp, 
   Sparkles, 
   Terminal, 
@@ -19,16 +18,12 @@ import { motion } from "motion/react";
 interface DashboardProps {
   experiences: Experience[];
   projects: Project[];
+  userName: string;
   onNavigate: (tab: string) => void;
 }
 
-export default function Dashboard({ experiences, projects, onNavigate }: DashboardProps) {
+export default function Dashboard({ experiences, projects, userName, onNavigate }: DashboardProps) {
   // Calculate career statistics
-  const careerStartDate = new Date("2023-01-10"); // arbitrary start date
-  const today = new Date();
-  const diffTime = Math.abs(today.getTime() - careerStartDate.getTime());
-  const careerDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
   const totalExperiences = experiences.length;
   const activeProjects = projects.filter(p => p.status === "Em produção" || p.status === "Em desenvolvimento").length;
   
@@ -70,25 +65,20 @@ export default function Dashboard({ experiences, projects, onNavigate }: Dashboa
     }
   });
 
-  // Normalize scores between 30 and 98 for realistic visual display
-  const finalCategoryScores = Object.keys(categoryScores).map(name => {
-    const raw = categoryScores[name];
-    let score = 40 + Math.min(raw.points * 1.5, 55); // base 40 + growth
-    if (raw.count === 0) {
-      // default starting scores based on Thiago's pre-existing curriculum
-      if (name === "Infraestrutura") score = 78;
-      if (name === "Automação") score = 84;
-      if (name === "Desenvolvimento") score = 74;
-      if (name === "Banco de Dados") score = 71;
-      if (name === "Segurança") score = 65;
-    }
-    return {
-      name,
-      score: Math.round(score),
-      count: Math.ceil(raw.count),
-      icon: getCategoryIcon(name)
-    };
-  }).sort((a, b) => b.score - a.score);
+  // Normalize scores between 30 and 98 for realistic visual display.
+  // Categories with no real experiences yet are omitted instead of showing a fake baseline.
+  const finalCategoryScores = Object.keys(categoryScores)
+    .filter(name => categoryScores[name].count > 0)
+    .map(name => {
+      const raw = categoryScores[name];
+      const score = 40 + Math.min(raw.points * 1.5, 55); // base 40 + growth
+      return {
+        name,
+        score: Math.round(score),
+        count: Math.ceil(raw.count),
+        icon: getCategoryIcon(name)
+      };
+    }).sort((a, b) => b.score - a.score);
 
   function getCategoryIcon(cat: string) {
     switch (cat) {
@@ -120,7 +110,7 @@ export default function Dashboard({ experiences, projects, onNavigate }: Dashboa
               <span>Sprint 0 • Ativa</span>
             </div>
             <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">
-              Olá, Thiago da Silva Pereira 👋
+              Olá, {userName || "bem-vindo"} 👋
             </h1>
             <p className="text-slate-400 max-w-2xl text-sm md:text-base">
               Seja bem-vindo de volta ao seu cérebro de carreira. Hoje é o momento perfeito para consolidar sua evolução profissional diária.
@@ -137,17 +127,10 @@ export default function Dashboard({ experiences, projects, onNavigate }: Dashboa
       </div>
 
       {/* Bento Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {[
-          { 
-            label: "Dias de Carreira", 
-            value: `${careerDays.toLocaleString()}`, 
-            desc: "Desde Jan/2023", 
-            icon: <Calendar className="w-5 h-5 text-emerald-400" />,
-            color: "border-emerald-500/10 hover:border-emerald-500/30 bg-emerald-950/5"
-          },
-          { 
-            label: "Projetos Ativos", 
+          {
+            label: "Projetos Ativos",
             value: `${activeProjects}`, 
             desc: "Registrados no Evolv", 
             icon: <Briefcase className="w-5 h-5 text-violet-400" />,
@@ -212,6 +195,11 @@ export default function Dashboard({ experiences, projects, onNavigate }: Dashboa
           </div>
 
           <div className="space-y-4">
+            {finalCategoryScores.length === 0 && (
+              <p className="text-xs text-slate-500 py-2">
+                Registre experiências para começar a construir seu Evolv Score.
+              </p>
+            )}
             {finalCategoryScores.map((cat, index) => (
               <div key={cat.name} className="space-y-2">
                 <div className="flex justify-between text-xs font-medium">
@@ -333,33 +321,37 @@ export default function Dashboard({ experiences, projects, onNavigate }: Dashboa
       </div>
 
       {/* Bottom: AI Insights / Quick Actions */}
-      <div className="bg-emerald-950/10 border border-emerald-500/30 rounded-xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 shadow-[0_0_20px_rgba(79,70,229,0.05)]">
-        <div className="flex items-center gap-4">
-          <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center animate-pulse shadow-[0_0_10px_rgba(99,102,241,0.5)] shrink-0">
-             <span className="text-white text-[10px] font-bold">AI</span>
+      {experiences.length > 0 && (
+        <div className="bg-emerald-950/10 border border-emerald-500/30 rounded-xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 shadow-[0_0_20px_rgba(79,70,229,0.05)]">
+          <div className="flex items-center gap-4">
+            <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center animate-pulse shadow-[0_0_10px_rgba(99,102,241,0.5)] shrink-0">
+               <span className="text-white text-[10px] font-bold">AI</span>
+            </div>
+            <div>
+              <p className="text-xs font-bold text-emerald-300 uppercase tracking-wider">Evolutionary Insight</p>
+              {experiences.length > 2 && (
+                <p className="text-sm text-slate-200 mt-0.5">
+                  Continue registrando experiências para desbloquear insights personalizados.
+                </p>
+              )}
+            </div>
           </div>
-          <div>
-            <p className="text-xs font-bold text-emerald-300 uppercase tracking-wider">Evolutionary Insight</p>
-            <p className="text-sm text-slate-200 mt-0.5">
-              Thiago, baseado nas suas últimas experiências com Python, você atingiu nível de excelência em <span className="font-mono text-white underline underline-offset-4 decoration-emerald-500">Conectividade SQL & Automação</span>.
-            </p>
+          <div className="flex gap-2 w-full md:w-auto shrink-0">
+            <button
+              onClick={() => onNavigate("resume")}
+              className="flex-1 md:flex-none px-4 py-2 border border-emerald-500/50 rounded-lg text-xs font-bold text-emerald-300 hover:bg-emerald-500/10 transition-colors uppercase tracking-wider"
+            >
+              Gerar Currículo
+            </button>
+            <button
+              onClick={() => onNavigate("linkedin")}
+              className="flex-1 md:flex-none px-4 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-lg text-xs font-bold text-white transition-shadow shadow-lg uppercase tracking-wider"
+            >
+              Atualizar LinkedIn
+            </button>
           </div>
         </div>
-        <div className="flex gap-2 w-full md:w-auto shrink-0">
-          <button 
-            onClick={() => onNavigate("resume")} 
-            className="flex-1 md:flex-none px-4 py-2 border border-emerald-500/50 rounded-lg text-xs font-bold text-emerald-300 hover:bg-emerald-500/10 transition-colors uppercase tracking-wider"
-          >
-            Gerar Currículo
-          </button>
-          <button 
-            onClick={() => onNavigate("linkedin")} 
-            className="flex-1 md:flex-none px-4 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-lg text-xs font-bold text-white transition-shadow shadow-lg uppercase tracking-wider"
-          >
-            Atualizar LinkedIn
-          </button>
-        </div>
-      </div>
+      )}
 
       {/* Daily Reflection prompt block */}
       <div className="p-6 rounded-xl bg-slate-900/60 border border-slate-850 flex flex-col md:flex-row md:items-center justify-between gap-6">

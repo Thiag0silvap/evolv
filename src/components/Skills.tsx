@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Experience } from "../types";
-import { Award, Zap, ChevronDown, ChevronUp, Clock, Calendar, CheckCircle2, Terminal, Code, Database, Shield } from "lucide-react";
+import { Award, Zap, ChevronDown, ChevronUp, Clock, CheckCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
 interface SkillsProps {
@@ -24,19 +24,6 @@ export default function Skills({ experiences }: SkillsProps) {
   // Derive skills and stats dynamically from experiences
   const calculateSkills = (): SkillStats[] => {
     const skillMap: { [key: string]: { points: number; lastUsed: string; exps: Experience[] } } = {};
-
-    // Base pre-loaded skills and fallback weighting if experiences are low
-    const baseWeights: { [key: string]: { points: number; lastUsed: string; category: string } } = {
-      "Python": { points: 81, lastUsed: "2026-07-15", category: "Linguagem" },
-      "SQL Server": { points: 73, lastUsed: "2026-07-15", category: "Banco de Dados" },
-      "PFSense": { points: 68, lastUsed: "2026-06-28", category: "Infraestrutura" },
-      "VPN": { points: 65, lastUsed: "2026-06-28", category: "Segurança" },
-      "Firewall": { points: 72, lastUsed: "2026-06-28", category: "Segurança" },
-      "PySide6": { points: 55, lastUsed: "2026-05-10", category: "Frontend UI" },
-      "Git": { points: 75, lastUsed: "2026-05-10", category: "Ferramenta" },
-      "Docker": { points: 42, lastUsed: "2026-02-22", category: "Infraestrutura" },
-      "Linux Server": { points: 58, lastUsed: "2026-02-22", category: "Infraestrutura" }
-    };
 
     // 1. Process technologies listed in experiences
     experiences.forEach(exp => {
@@ -75,20 +62,6 @@ export default function Skills({ experiences }: SkillsProps) {
           skillMap[normalized].lastUsed = exp.date;
         }
       });
-    });
-
-    // Merge with baseWeights to ensure a professional initial level display
-    Object.keys(baseWeights).forEach(techName => {
-      if (!skillMap[techName]) {
-        skillMap[techName] = { 
-          points: baseWeights[techName].points, 
-          lastUsed: baseWeights[techName].lastUsed, 
-          exps: experiences.filter(e => e.technologies?.includes(techName) || e.competencies?.includes(techName))
-        };
-      } else {
-        // Boost existing calculated score with historical mastery
-        skillMap[techName].points += Math.round(baseWeights[techName].points * 0.4);
-      }
     });
 
     // 2. Format into statistics array
@@ -159,6 +132,13 @@ export default function Skills({ experiences }: SkillsProps) {
       </div>
 
       {/* Grid of Skill Cards */}
+      {calculatedSkills.length === 0 ? (
+        <div className="p-10 rounded-xl bg-slate-900/40 border border-slate-850 text-center space-y-3">
+          <Award className="w-8 h-8 text-slate-600 mx-auto" />
+          <p className="text-sm text-slate-400 font-medium">Nenhuma habilidade registrada ainda.</p>
+          <p className="text-xs text-slate-500">Suas competências aparecem aqui conforme você registra experiências.</p>
+        </div>
+      ) : (
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {calculatedSkills.map((skill, index) => {
           const isExpanded = expandedSkill === skill.name;
@@ -262,6 +242,7 @@ export default function Skills({ experiences }: SkillsProps) {
           );
         })}
       </div>
+      )}
 
     </div>
   );

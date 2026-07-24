@@ -161,6 +161,9 @@ export default function App() {
     setActiveTab("dashboard");
   };
 
+  const userName = session?.user.user_metadata?.name || session?.user.email || "";
+  const userTitle = session?.user.user_metadata?.title || null;
+
   // Tab definitions
   const tabs = [
     { id: "dashboard", label: "Dashboard", icon: <LayoutDashboard className="w-4 h-4" /> },
@@ -204,14 +207,14 @@ export default function App() {
           {/* User Profile Badge */}
           <div className="px-3 py-2.5 bg-slate-950/40 border border-slate-800/80 rounded-xl flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-slate-850 border border-white/10 flex items-center justify-center text-xs font-bold text-emerald-400 shrink-0">
-              {(session.user.user_metadata?.name || session.user.email || "?").charAt(0).toUpperCase()}
+              {(userName || "?").charAt(0).toUpperCase()}
             </div>
             <div className="min-w-0">
               <p className="text-[11px] text-slate-300 font-bold uppercase tracking-wider truncate leading-none">
-                {session.user.user_metadata?.name || session.user.email}
+                {userName}
               </p>
               <p className="text-[9px] text-slate-500 truncate mt-1">
-                {session.user.user_metadata?.title || session.user.email}
+                {userTitle || session.user.email}
               </p>
             </div>
           </div>
@@ -330,6 +333,7 @@ export default function App() {
               <Dashboard
                 experiences={experiences}
                 projects={projects}
+                userName={userName}
                 onNavigate={(tab) => setActiveTab(tab)}
               />
             )}
@@ -366,7 +370,7 @@ export default function App() {
             )}
 
             {activeTab === "linkedin" && (
-              <LinkedIn experiences={experiences} />
+              <LinkedIn experiences={experiences} userName={userName} userTitle={userTitle} />
             )}
 
             {activeTab === "prd" && (
