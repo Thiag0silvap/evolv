@@ -82,7 +82,7 @@ export default function Dashboard({ experiences, projects, userName, onNavigate 
 
   function getCategoryIcon(cat: string) {
     switch (cat) {
-      case "Infraestrutura": return <Terminal className="w-4 h-4 text-emerald-400" />;
+      case "Infraestrutura": return <Terminal className="w-4 h-4 text-brand-cyan" />;
       case "Automação": return <Zap className="w-4 h-4 text-amber-400" />;
       case "Desenvolvimento": return <Code className="w-4 h-4 text-violet-400" />;
       case "Banco de Dados": return <Database className="w-4 h-4 text-blue-400" />;
@@ -101,7 +101,7 @@ export default function Dashboard({ experiences, projects, userName, onNavigate 
       {/* Welcome Banner */}
       <div className="p-5 md:p-6 rounded-xl bg-gradient-to-br from-slate-900 via-slate-850 to-zinc-900 border border-slate-850 relative overflow-hidden shadow-xl">
         <div className="absolute top-0 right-0 w-80 h-80 bg-violet-650/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
-        <div className="absolute bottom-0 left-10 w-60 h-60 bg-emerald-600/5 rounded-full blur-3xl -ml-20 -mb-20"></div>
+        <div className="absolute bottom-0 left-10 w-60 h-60 bg-brand-blue/5 rounded-full blur-3xl -ml-20 -mb-20"></div>
         
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
@@ -114,7 +114,7 @@ export default function Dashboard({ experiences, projects, userName, onNavigate 
           </div>
           <button 
             onClick={() => onNavigate("experiences")}
-            className="px-5 py-3 bg-emerald-600 hover:bg-emerald-500 transition-all text-white font-medium text-sm rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-900/20 group hover:scale-[1.02]"
+            className="px-5 py-3 bg-brand-blue hover:bg-brand-blue transition-all text-white font-medium text-sm rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-brand-violet/20 group hover:scale-[1.02]"
           >
             <span>Registrar Experiência</span>
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -176,14 +176,14 @@ export default function Dashboard({ experiences, projects, userName, onNavigate 
           <div className="flex justify-between items-center pb-2 border-b border-slate-850">
             <div className="space-y-1">
               <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-emerald-400" />
+                <TrendingUp className="w-4 h-4 text-brand-cyan" />
                 Evolv Score
               </h2>
               <p className="text-xs text-slate-400">Pontuação de competência baseada em logs reais</p>
             </div>
             <button 
               onClick={() => onNavigate("skills")} 
-              className="text-xs font-medium text-emerald-400 hover:text-emerald-300 transition-colors flex items-center gap-1"
+              className="text-xs font-medium text-brand-cyan hover:text-brand-cyan transition-colors flex items-center gap-1"
             >
               <span>Ver Habilidades</span>
               <ArrowRight className="w-3 h-3" />
@@ -216,7 +216,7 @@ export default function Dashboard({ experiences, projects, userName, onNavigate 
                     transition={{ duration: 1, delay: index * 0.15 }}
                     className={`h-full rounded-full bg-gradient-to-r ${
                       cat.name === "Automação" ? "from-amber-500 to-yellow-400" :
-                      cat.name === "Infraestrutura" ? "from-emerald-500 to-teal-400" :
+                      cat.name === "Infraestrutura" ? "from-brand-blue to-teal-400" :
                       cat.name === "Desenvolvimento" ? "from-violet-500 to-indigo-400" :
                       cat.name === "Banco de Dados" ? "from-blue-500 to-cyan-400" :
                       "from-red-500 to-orange-400"
@@ -288,7 +288,7 @@ export default function Dashboard({ experiences, projects, userName, onNavigate 
                       <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">{exp.description}</p>
                       
                       {exp.result && (
-                        <div className="text-[11px] text-emerald-400 bg-emerald-950/20 border border-emerald-900/10 px-2.5 py-1.5 rounded-lg flex items-start gap-1.5 leading-relaxed">
+                        <div className="text-[11px] text-brand-cyan bg-brand-violet/20 border border-brand-violet/10 px-2.5 py-1.5 rounded-lg flex items-start gap-1.5 leading-relaxed">
                           <TrendingUp className="w-3.5 h-3.5 shrink-0 mt-0.5" />
                           <span><strong>Métrica de Impacto:</strong> {exp.result}</span>
                         </div>
@@ -318,13 +318,13 @@ export default function Dashboard({ experiences, projects, userName, onNavigate 
 
       {/* Bottom: AI Insights / Quick Actions */}
       {experiences.length > 0 && (
-        <div className="bg-emerald-950/10 border border-emerald-500/30 rounded-xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 shadow-[0_0_20px_rgba(79,70,229,0.05)]">
+        <div className="bg-brand-violet/10 border border-brand-blue/30 rounded-xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 shadow-[0_0_20px_rgba(79,70,229,0.05)]">
           <div className="flex items-center gap-4">
-            <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center animate-pulse shadow-[0_0_10px_rgba(99,102,241,0.5)] shrink-0">
+            <div className="w-8 h-8 rounded-full bg-brand-blue flex items-center justify-center animate-pulse shadow-[0_0_10px_rgba(99,102,241,0.5)] shrink-0">
                <span className="text-white text-[10px] font-bold">AI</span>
             </div>
             <div>
-              <p className="text-xs font-bold text-emerald-300 uppercase tracking-wider">Evolutionary Insight</p>
+              <p className="text-xs font-bold text-brand-cyan uppercase tracking-wider">Evolutionary Insight</p>
               {experiences.length > 2 && (
                 <p className="text-sm text-slate-200 mt-0.5">
                   Continue registrando experiências para desbloquear insights personalizados.
@@ -335,13 +335,13 @@ export default function Dashboard({ experiences, projects, userName, onNavigate 
           <div className="flex gap-2 w-full md:w-auto shrink-0">
             <button
               onClick={() => onNavigate("resume")}
-              className="flex-1 md:flex-none px-4 py-2 border border-emerald-500/50 rounded-lg text-xs font-bold text-emerald-300 hover:bg-emerald-500/10 transition-colors uppercase tracking-wider"
+              className="flex-1 md:flex-none px-4 py-2 border border-brand-blue/50 rounded-lg text-xs font-bold text-brand-cyan hover:bg-brand-blue/10 transition-colors uppercase tracking-wider"
             >
               Gerar Currículo
             </button>
             <button
               onClick={() => onNavigate("linkedin")}
-              className="flex-1 md:flex-none px-4 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-lg text-xs font-bold text-white transition-shadow shadow-lg uppercase tracking-wider"
+              className="flex-1 md:flex-none px-4 py-2 bg-brand-blue hover:bg-brand-blue rounded-lg text-xs font-bold text-white transition-shadow shadow-lg uppercase tracking-wider"
             >
               Atualizar LinkedIn
             </button>

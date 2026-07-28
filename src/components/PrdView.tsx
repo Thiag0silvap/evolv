@@ -37,16 +37,16 @@ export default function PrdView() {
       
       {/* Header Banner */}
       <div className="p-6 md:p-8 rounded-2xl bg-gradient-to-br from-slate-900 via-slate-850 to-zinc-900 border border-slate-850 space-y-4 shadow-2xl relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-600/5 rounded-full blur-2xl"></div>
+        <div className="absolute top-0 right-0 w-48 h-48 bg-brand-blue/5 rounded-full blur-2xl"></div>
         
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div className="space-y-1.5">
-            <div className="flex items-center gap-1.5 px-3 py-1 bg-emerald-950/40 border border-emerald-900/30 text-emerald-400 text-xs font-semibold rounded-full w-max">
+            <div className="flex items-center gap-1.5 px-3 py-1 bg-brand-violet/40 border border-brand-violet/30 text-brand-cyan text-xs font-semibold rounded-full w-max">
               <CheckCircle2 className="w-3.5 h-3.5" />
               <span>Sprint 0 • Concluída</span>
             </div>
             <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2">
-              <FileText className="w-6 h-6 md:w-7 md:h-7 text-emerald-400" />
+              <FileText className="w-6 h-6 md:w-7 md:h-7 text-brand-cyan" />
               Product Requirements Document (PRD)
             </h1>
             <p className="text-slate-400 text-sm">
@@ -58,8 +58,8 @@ export default function PrdView() {
             onClick={() => setIsSigned(!isSigned)}
             className={`px-4 py-2 text-xs font-extrabold tracking-wider uppercase rounded-xl border transition-all ${
               isSigned 
-                ? "bg-emerald-950/30 text-emerald-400 border-emerald-800" 
-                : "bg-emerald-600 hover:bg-emerald-500 text-white border-transparent hover:scale-[1.02] shadow-lg shadow-emerald-950/20"
+                ? "bg-brand-violet/30 text-brand-cyan border-brand-violet" 
+                : "bg-brand-blue hover:bg-brand-blue text-white border-transparent hover:scale-[1.02] shadow-lg shadow-brand-violet/20"
             }`}
           >
             {isSigned ? "✓ PRD Aprovado" : "Assinar & Aprovar PRD"}
@@ -82,8 +82,8 @@ export default function PrdView() {
           </div>
           <div>
             <span className="text-slate-500 block">Status:</span>
-            <strong className="text-emerald-400 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <strong className="text-brand-cyan flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-brand-cyan animate-pulse"></span>
               Aprovado para MVP
             </strong>
           </div>
@@ -100,7 +100,7 @@ export default function PrdView() {
             className="w-full flex items-center justify-between text-lg font-bold text-white border-b border-slate-800/60 pb-1.5 focus:outline-none"
           >
             <span className="flex items-center gap-2">
-              <Compass className="w-5 h-5 text-emerald-400" />
+              <Compass className="w-5 h-5 text-brand-cyan" />
               1. Visão Geral do Produto
             </span>
             <ChevronRight className={`w-4 h-4 text-slate-500 transition-transform ${expandedSections.vision ? "rotate-90" : ""}`} />
@@ -233,7 +233,7 @@ export default function PrdView() {
       {/* Checklist box */}
       <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-850 space-y-4">
         <h3 className="text-base font-bold text-white flex items-center gap-2">
-          <Rocket className="w-5 h-5 text-emerald-400 animate-bounce" />
+          <Rocket className="w-5 h-5 text-brand-cyan animate-bounce" />
           Roteiro de Validação da Startup (Sprint 0)
         </h3>
 
@@ -247,7 +247,7 @@ export default function PrdView() {
             { label: "Configuração do Copiloto Gemini IA", status: true }
           ].map(task => (
             <div key={task.label} className="p-3 bg-slate-950 border border-slate-850/60 rounded-xl flex items-center gap-3">
-              <span className="text-emerald-400"><CheckCircle2 className="w-5 h-5" /></span>
+              <span className="text-brand-cyan"><CheckCircle2 className="w-5 h-5" /></span>
               <span className="text-xs font-bold text-slate-300">{task.label}</span>
             </div>
           ))}

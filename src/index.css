@@ -8,16 +8,9 @@
   --color-slate-750: #30363D;
   --color-slate-700: #484F58;
 
-  --color-emerald-950: #1E1B4B;
-  --color-emerald-900: #312E81;
-  --color-emerald-800: #3730A3;
-  --color-emerald-700: #4338CA;
-  --color-emerald-600: #4F46E5;
-  --color-emerald-500: #6366F1;
-  --color-emerald-400: #818CF8;
-  --color-emerald-300: #A5B4FC;
-  --color-emerald-200: #C7D2FE;
-  --color-emerald-100: #E0E7FF;
+  --color-brand-cyan: #00D6DC;
+  --color-brand-blue: #1152F7;
+  --color-brand-violet: #4919F2;
 }
 
 @layer base {

@@ -217,12 +217,12 @@ export default function Experiences({
         <ImportResume onAddExperience={onAddExperience} />
 
         <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-850 space-y-6 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-600/5 rounded-full blur-2xl pointer-events-none"></div>
+          <div className="absolute top-0 right-0 w-32 h-32 bg-brand-blue/5 rounded-full blur-2xl pointer-events-none"></div>
           
           <div className="flex justify-between items-center">
             <div className="space-y-1">
               <h2 className="text-xl font-extrabold text-white flex items-center gap-2">
-                <BrainCircuit className="w-5 h-5 text-emerald-400" />
+                <BrainCircuit className="w-5 h-5 text-brand-cyan" />
                 {editingId ? "Editar Registro" : "Reflexão Diária"}
               </h2>
               <p className="text-xs text-slate-400">
@@ -251,7 +251,7 @@ export default function Experiences({
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Ex: Criei um script em Python que consulta o SQL Server, extrai dados de faturamento e gera automaticamente uma planilha usando OpenPyXL para o setor financeiro."
                 rows={4}
-                className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-4 py-3 text-slate-200 text-sm placeholder-slate-600 focus:outline-none transition-colors leading-relaxed"
+                className="w-full bg-slate-950 border border-slate-800 focus:border-brand-blue rounded-xl px-4 py-3 text-slate-200 text-sm placeholder-slate-600 focus:outline-none transition-colors leading-relaxed"
               />
               
               {!editingId && (
@@ -316,7 +316,7 @@ export default function Experiences({
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
                       placeholder="Ex: Automação de Relatório Financeiro"
-                      className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-lg px-3 py-2 text-slate-200 text-xs focus:outline-none transition-colors"
+                      className="w-full bg-slate-950 border border-slate-800 focus:border-brand-blue rounded-lg px-3 py-2 text-slate-200 text-xs focus:outline-none transition-colors"
                       required
                     />
                   </div>
@@ -329,7 +329,7 @@ export default function Experiences({
                         type="date"
                         value={date}
                         onChange={(e) => setDate(e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-lg px-3 py-2 text-slate-200 text-xs focus:outline-none transition-colors"
+                        className="w-full bg-slate-950 border border-slate-800 focus:border-brand-blue rounded-lg px-3 py-2 text-slate-200 text-xs focus:outline-none transition-colors"
                         required
                       />
                     </div>
@@ -338,7 +338,7 @@ export default function Experiences({
                       <select
                         value={category}
                         onChange={(e) => setCategory(e.target.value as CategoryType)}
-                        className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-lg px-3 py-2 text-slate-200 text-xs focus:outline-none transition-colors"
+                        className="w-full bg-slate-950 border border-slate-800 focus:border-brand-blue rounded-lg px-3 py-2 text-slate-200 text-xs focus:outline-none transition-colors"
                       >
                         {CATEGORIES.map(cat => (
                           <option key={cat} value={cat}>{cat}</option>
@@ -355,7 +355,7 @@ export default function Experiences({
                       value={project}
                       onChange={(e) => setProject(e.target.value)}
                       placeholder="Ex: Plataforma Financeira ou Geral"
-                      className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-lg px-3 py-2 text-slate-200 text-xs focus:outline-none transition-colors"
+                      className="w-full bg-slate-950 border border-slate-800 focus:border-brand-blue rounded-lg px-3 py-2 text-slate-200 text-xs focus:outline-none transition-colors"
                     />
                   </div>
 
@@ -369,7 +369,7 @@ export default function Experiences({
                         onChange={(e) => setTechInput(e.target.value)}
                         onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddTech())}
                         placeholder="Ex: Python (Enter)"
-                        className="flex-1 bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-lg px-3 py-2 text-slate-200 text-xs focus:outline-none transition-colors"
+                        className="flex-1 bg-slate-950 border border-slate-800 focus:border-brand-blue rounded-lg px-3 py-2 text-slate-200 text-xs focus:outline-none transition-colors"
                       />
                       <button
                         type="button"
@@ -409,7 +409,7 @@ export default function Experiences({
                         onChange={(e) => setCompetencyInput(e.target.value)}
                         onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddCompetency())}
                         placeholder="Ex: Automação (Enter)"
-                        className="flex-1 bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-lg px-3 py-2 text-slate-200 text-xs focus:outline-none transition-colors"
+                        className="flex-1 bg-slate-950 border border-slate-800 focus:border-brand-blue rounded-lg px-3 py-2 text-slate-200 text-xs focus:outline-none transition-colors"
                       />
                       <button
                         type="button"
@@ -447,7 +447,7 @@ export default function Experiences({
                       value={result}
                       onChange={(e) => setResult(e.target.value)}
                       placeholder="Ex: Economia de 4h de faturamento semanal ou 100% de conexões seguras."
-                      className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-lg px-3 py-2 text-slate-200 text-xs focus:outline-none transition-colors"
+                      className="w-full bg-slate-950 border border-slate-800 focus:border-brand-blue rounded-lg px-3 py-2 text-slate-200 text-xs focus:outline-none transition-colors"
                     />
                     <span className="block text-[10px] text-slate-500">Crucial para que a IA gere seu currículo baseado em conquistas reais.</span>
                   </div>
@@ -456,7 +456,7 @@ export default function Experiences({
                   <div className="pt-3 flex gap-3">
                     <button
                       type="submit"
-                      className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-lg text-xs transition-colors flex items-center justify-center gap-1.5 shadow-md shadow-emerald-950/25"
+                      className="flex-1 py-2.5 bg-brand-blue hover:bg-brand-blue text-white font-semibold rounded-lg text-xs transition-colors flex items-center justify-center gap-1.5 shadow-md shadow-brand-violet/25"
                     >
                       <Save className="w-4 h-4" />
                       <span>{editingId ? "Salvar Alterações" : "Salvar Registro"}</span>
@@ -490,7 +490,7 @@ export default function Experiences({
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Buscar por título, tecnologias, projeto..."
-              className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-lg pl-9 pr-3 py-2 text-slate-200 text-xs focus:outline-none transition-all placeholder-slate-600"
+              className="w-full bg-slate-950 border border-slate-800 focus:border-brand-blue rounded-lg pl-9 pr-3 py-2 text-slate-200 text-xs focus:outline-none transition-all placeholder-slate-600"
             />
           </div>
 
@@ -505,7 +505,7 @@ export default function Experiences({
                 onClick={() => setSelectedCategoryFilter(cat)}
                 className={`px-3 py-1 rounded-md text-[10px] font-semibold tracking-wider uppercase border transition-all ${
                   selectedCategoryFilter === cat
-                    ? "bg-emerald-900/30 text-emerald-400 border-emerald-800"
+                    ? "bg-brand-violet/30 text-brand-cyan border-brand-violet"
                     : "bg-slate-950 text-slate-400 border-slate-850 hover:border-slate-800 hover:text-slate-300"
                 }`}
               >
@@ -548,7 +548,7 @@ export default function Experiences({
                           Projeto: {exp.project || "Geral"}
                         </span>
                       </div>
-                      <h3 className="text-base font-bold text-white group-hover:text-emerald-400 transition-colors pt-1">
+                      <h3 className="text-base font-bold text-white group-hover:text-brand-cyan transition-colors pt-1">
                         {exp.title}
                       </h3>
                     </div>
@@ -574,7 +574,7 @@ export default function Experiences({
                   <p className="text-xs text-slate-400 leading-relaxed text-justify font-sans">{exp.description}</p>
 
                   {exp.result && (
-                    <div className="p-3 bg-emerald-950/20 border border-emerald-900/20 rounded-xl flex items-start gap-2.5 text-emerald-400 leading-relaxed text-xs">
+                    <div className="p-3 bg-brand-violet/20 border border-brand-violet/20 rounded-xl flex items-start gap-2.5 text-brand-cyan leading-relaxed text-xs">
                       <TrendingUp className="w-4 h-4 shrink-0 mt-0.5" />
                       <span><strong>Impacto:</strong> {exp.result}</span>
                     </div>

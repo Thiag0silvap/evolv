@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { Experience, Project } from "../types";
-import { 
-  FileText, 
-  Sparkles, 
-  Copy, 
-  Download, 
-  Printer, 
-  CheckSquare, 
-  Square, 
+import {
+  FileText,
+  Sparkles,
+  Copy,
+  Download,
+  Printer,
+  CheckSquare,
+  Square,
   AlertCircle,
   Clock,
   Briefcase,
@@ -40,8 +40,8 @@ export default function Resume({ experiences, projects }: ResumeProps) {
   const [generatedMarkdown, setGeneratedMarkdown] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [exportingFormat, setExportingFormat] = useState<"pdf" | "docx" | null>(null);
   const [copySuccess, setCopySuccess] = useState(false);
+  const [exportingFormat, setExportingFormat] = useState<"pdf" | "docx" | null>(null);
 
   // Toggle selection
   const handleToggleSelectExp = (id: string) => {
@@ -172,7 +172,7 @@ export default function Resume({ experiences, projects }: ResumeProps) {
         <div className="p-6 rounded-xl bg-slate-900/60 border border-slate-850 space-y-6">
           <div className="space-y-1">
             <h2 className="text-lg font-bold text-white flex items-center gap-2">
-              <FileText className="w-5 h-5 text-emerald-400" />
+              <FileText className="w-5 h-5 text-brand-cyan" />
               Compilador de Currículo Inteligente
             </h2>
             <p className="text-xs text-slate-400">
@@ -189,7 +189,7 @@ export default function Resume({ experiences, projects }: ResumeProps) {
                 value={targetRole}
                 onChange={(e) => setTargetRole(e.target.value)}
                 placeholder="Ex: Engenheiro de Software Python, Analista DevOps"
-                className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-lg px-3 py-2 text-slate-200 text-xs focus:outline-none transition-colors"
+                className="w-full bg-slate-950 border border-slate-800 focus:border-brand-blue rounded-lg px-3 py-2 text-slate-200 text-xs focus:outline-none transition-colors"
               />
             </div>
 
@@ -201,7 +201,7 @@ export default function Resume({ experiences, projects }: ResumeProps) {
                 onChange={(e) => setCustomInstructions(e.target.value)}
                 placeholder="Ex: Foque bastante em projetos de automação e minimize suporte operacional corporativo básico."
                 rows={3}
-                className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-lg px-3 py-2 text-slate-200 text-xs focus:outline-none transition-colors leading-relaxed"
+                className="w-full bg-slate-950 border border-slate-800 focus:border-brand-blue rounded-lg px-3 py-2 text-slate-200 text-xs focus:outline-none transition-colors leading-relaxed"
               />
             </div>
 
@@ -212,7 +212,7 @@ export default function Resume({ experiences, projects }: ResumeProps) {
                   Selecionar Conquistas ({selectedExpIds.length} de {experiences.length})
                 </label>
                 <div className="flex gap-2 text-[10px] font-semibold uppercase">
-                  <button onClick={handleSelectAll} className="text-emerald-400 hover:text-emerald-300 transition-colors">Todos</button>
+                  <button onClick={handleSelectAll} className="text-brand-cyan hover:text-brand-cyan transition-colors">Todos</button>
                   <span className="text-slate-700">|</span>
                   <button onClick={handleClearAll} className="text-slate-500 hover:text-slate-400 transition-colors">Nenhum</button>
                 </div>
@@ -228,7 +228,7 @@ export default function Resume({ experiences, projects }: ResumeProps) {
                       onClick={() => handleToggleSelectExp(exp.id)}
                       className="w-full text-left p-2.5 rounded-lg hover:bg-slate-900 flex items-start gap-2.5 transition-colors group"
                     >
-                      <span className="text-emerald-400 mt-0.5 shrink-0">
+                      <span className="text-brand-cyan mt-0.5 shrink-0">
                         {isChecked ? (
                           <CheckSquare className="w-4 h-4" />
                         ) : (
@@ -236,7 +236,7 @@ export default function Resume({ experiences, projects }: ResumeProps) {
                         )}
                       </span>
                       <div className="space-y-0.5 min-w-0">
-                        <div className="text-xs font-bold text-white truncate group-hover:text-emerald-400 transition-colors">
+                        <div className="text-xs font-bold text-white truncate group-hover:text-brand-cyan transition-colors">
                           {exp.title}
                         </div>
                         <div className="text-[10px] text-slate-500 font-mono flex items-center gap-2">
@@ -262,7 +262,7 @@ export default function Resume({ experiences, projects }: ResumeProps) {
             <button
               onClick={handleCompileResume}
               disabled={isLoading || experiences.length === 0}
-              className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-800 disabled:text-slate-600 text-white font-extrabold rounded-xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-950/30 group"
+              className="w-full py-3 bg-brand-blue hover:bg-brand-blue disabled:bg-slate-800 disabled:text-slate-600 text-white font-extrabold rounded-xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-lg shadow-brand-violet/30 group"
             >
               {isLoading ? (
                 <>
@@ -271,7 +271,7 @@ export default function Resume({ experiences, projects }: ResumeProps) {
                 </>
               ) : (
                 <>
-                  <Sparkles className="w-4 h-4 text-emerald-300 group-hover:scale-110 transition-transform animate-pulse" />
+                  <Sparkles className="w-4 h-4 text-brand-cyan group-hover:scale-110 transition-transform animate-pulse" />
                   <span>Compilar com Gemini IA</span>
                 </>
               )}
@@ -349,7 +349,7 @@ export default function Resume({ experiences, projects }: ResumeProps) {
                 exit={{ opacity: 0 }}
                 className="absolute inset-0 bg-white/95 rounded-2xl flex flex-col justify-center items-center p-10 text-center space-y-4 z-10"
               >
-                <div className="w-12 h-12 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-12 h-12 border-4 border-brand-blue border-t-transparent rounded-full animate-spin"></div>
                 <div className="space-y-1">
                   <h3 className="text-base font-bold text-slate-900">Analisando suas conquistas...</h3>
                   <p className="text-xs text-slate-500 max-w-sm">

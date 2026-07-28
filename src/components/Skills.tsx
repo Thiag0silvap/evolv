@@ -112,7 +112,7 @@ export default function Skills({ experiences }: SkillsProps) {
       case "Desenvolvimento": return "bg-violet-950/20 text-violet-300 border-violet-900/30";
       case "Banco de Dados": return "bg-blue-950/20 text-blue-300 border-blue-900/30";
       case "Segurança & Redes": return "bg-red-950/20 text-red-300 border-red-900/30";
-      case "Infraestrutura": return "bg-emerald-950/20 text-emerald-300 border-emerald-900/30";
+      case "Infraestrutura": return "bg-brand-violet/20 text-brand-cyan border-brand-violet/30";
       case "Automação": return "bg-amber-950/20 text-amber-300 border-amber-900/30";
       default: return "bg-slate-850 text-slate-300 border-slate-800";
     }
@@ -123,7 +123,7 @@ export default function Skills({ experiences }: SkillsProps) {
       {/* Top Description Banner */}
       <div className="p-6 rounded-xl bg-gradient-to-r from-slate-900 to-zinc-900 border border-slate-850 space-y-2">
         <h1 className="text-2xl font-extrabold text-white tracking-tight flex items-center gap-2">
-          <Award className="w-6 h-6 text-emerald-400" />
+          <Award className="w-6 h-6 text-brand-cyan" />
           Mapa de Habilidades Orgânicas
         </h1>
         <p className="text-slate-400 text-sm max-w-3xl">
@@ -163,7 +163,7 @@ export default function Skills({ experiences }: SkillsProps) {
 
                   <div className="px-2.5 py-1 rounded-xl bg-slate-950 border border-slate-800 text-center shrink-0">
                     <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Nível</div>
-                    <div className="text-sm font-extrabold text-emerald-400">{skill.level}</div>
+                    <div className="text-sm font-extrabold text-brand-cyan">{skill.level}</div>
                   </div>
                 </div>
 
@@ -175,7 +175,7 @@ export default function Skills({ experiences }: SkillsProps) {
                   </div>
                   <div className="h-2 w-full bg-slate-950 rounded-full overflow-hidden">
                     <div 
-                      className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-500" 
+                      className="h-full bg-gradient-to-r from-brand-blue to-teal-400 rounded-full transition-all duration-500" 
                       style={{ width: `${skill.percentage}%` }}
                     />
                   </div>
@@ -226,7 +226,7 @@ export default function Skills({ experiences }: SkillsProps) {
                           <div className="font-bold text-slate-200 line-clamp-1">{exp.title}</div>
                           <div className="text-slate-400 line-clamp-2 leading-relaxed">{exp.description}</div>
                           {exp.result && (
-                            <div className="text-[10px] text-emerald-400 leading-snug font-medium border-t border-slate-850/40 pt-1 flex items-start gap-1">
+                            <div className="text-[10px] text-brand-cyan leading-snug font-medium border-t border-slate-850/40 pt-1 flex items-start gap-1">
                               <CheckCircle2 className="w-3 h-3 shrink-0 mt-0.5" />
                               <span>{exp.result}</span>
                             </div>

@@ -68,7 +68,7 @@ export default function Auth() {
         className="w-full max-w-sm bg-slate-900 border border-slate-850 rounded-2xl p-6 space-y-6"
       >
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 bg-emerald-600 rounded flex items-center justify-center font-bold text-white shadow-[0_0_15px_rgba(79,70,229,0.4)]">
+          <div className="w-8 h-8 bg-brand-blue rounded flex items-center justify-center font-bold text-white shadow-[0_0_15px_rgba(79,70,229,0.4)]">
             E
           </div>
           <div>
@@ -91,7 +91,7 @@ export default function Auth() {
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-3 py-2.5 bg-slate-950/60 border border-slate-800 rounded-lg text-sm text-slate-100 focus:outline-none focus:border-emerald-500"
+                  className="w-full px-3 py-2.5 bg-slate-950/60 border border-slate-800 rounded-lg text-sm text-slate-100 focus:outline-none focus:border-brand-blue"
                   placeholder="Seu nome completo"
                 />
               </div>
@@ -103,7 +103,7 @@ export default function Auth() {
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full px-3 py-2.5 bg-slate-950/60 border border-slate-800 rounded-lg text-sm text-slate-100 focus:outline-none focus:border-emerald-500"
+                  className="w-full px-3 py-2.5 bg-slate-950/60 border border-slate-800 rounded-lg text-sm text-slate-100 focus:outline-none focus:border-brand-blue"
                   placeholder="Ex: Analista de TI & Automações"
                 />
               </div>
@@ -119,7 +119,7 @@ export default function Auth() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2.5 bg-slate-950/60 border border-slate-800 rounded-lg text-sm text-slate-100 focus:outline-none focus:border-emerald-500"
+              className="w-full px-3 py-2.5 bg-slate-950/60 border border-slate-800 rounded-lg text-sm text-slate-100 focus:outline-none focus:border-brand-blue"
               placeholder="voce@exemplo.com"
             />
           </div>
@@ -134,7 +134,7 @@ export default function Auth() {
               minLength={6}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2.5 bg-slate-950/60 border border-slate-800 rounded-lg text-sm text-slate-100 focus:outline-none focus:border-emerald-500"
+              className="w-full px-3 py-2.5 bg-slate-950/60 border border-slate-800 rounded-lg text-sm text-slate-100 focus:outline-none focus:border-brand-blue"
               placeholder="••••••••"
             />
           </div>
@@ -147,7 +147,7 @@ export default function Auth() {
           )}
 
           {infoMessage && (
-            <div className="flex items-start gap-2 px-3 py-2.5 bg-emerald-950/30 border border-emerald-900/40 rounded-lg text-xs text-emerald-400">
+            <div className="flex items-start gap-2 px-3 py-2.5 bg-brand-violet/30 border border-brand-violet/40 rounded-lg text-xs text-brand-cyan">
               <CheckCircle2 className="w-3.5 h-3.5 shrink-0 mt-0.5" />
               <span>{infoMessage}</span>
             </div>
@@ -156,7 +156,7 @@ export default function Auth() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold uppercase tracking-wider transition-all"
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-brand-blue hover:bg-brand-blue disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold uppercase tracking-wider transition-all"
           >
             <Sparkles className="w-3.5 h-3.5" />
             <span>{isLoading ? "Aguarde..." : mode === "login" ? "Entrar" : "Criar conta"}</span>
@@ -165,7 +165,7 @@ export default function Auth() {
 
         <button
           onClick={handleToggleMode}
-          className="w-full text-center text-[11px] text-slate-500 hover:text-emerald-400 font-medium transition-colors"
+          className="w-full text-center text-[11px] text-slate-500 hover:text-brand-cyan font-medium transition-colors"
         >
           {mode === "login" ? "Não tem conta? Criar conta" : "Já tem conta? Entrar"}
         </button>

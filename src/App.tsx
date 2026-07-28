@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { Experience, Project } from "./types";
 import { supabase } from "./supabaseClient";
+import evolvIcon from "../assets/evolv-icon-transparent.png";
 import Auth from "./components/Auth";
 import Dashboard from "./components/Dashboard";
 import Experiences from "./components/Experiences";
@@ -206,7 +207,7 @@ export default function App() {
             title={sidebarCollapsed ? "Expandir menu" : "Recolher menu"}
             className={`w-full flex items-center ${sidebarCollapsed ? "justify-center" : "gap-2.5"} px-2 cursor-pointer hover:opacity-80 active:scale-95 transition-all`}
           >
-            <div className="w-8 h-8 bg-emerald-600 rounded flex items-center justify-center font-bold text-white shadow-[0_0_15px_rgba(79,70,229,0.4)] shrink-0">E</div>
+            <img src={evolvIcon} alt="Evolv" className="w-8 h-8 shrink-0 object-contain" />
             {!sidebarCollapsed && (
               <span className="text-lg font-bold text-white tracking-tight font-sans">EVOLV</span>
             )}
@@ -215,7 +216,7 @@ export default function App() {
           {/* User Profile Badge */}
           <div className={`py-2.5 bg-slate-950/40 border border-slate-800/80 rounded-xl flex items-center gap-3 ${sidebarCollapsed ? "justify-center px-2" : "px-3"}`}>
             <div
-              className="w-8 h-8 rounded-full bg-slate-850 border border-white/10 flex items-center justify-center text-xs font-bold text-emerald-400 shrink-0"
+              className="w-8 h-8 rounded-full bg-slate-850 border border-white/10 flex items-center justify-center text-xs font-bold text-brand-cyan shrink-0"
               title={sidebarCollapsed ? userName : undefined}
             >
               {(userName || "?").charAt(0).toUpperCase()}
@@ -243,7 +244,7 @@ export default function App() {
                   sidebarCollapsed ? "justify-center" : ""
                 } ${
                   activeTab === tab.id
-                    ? "bg-gradient-to-r from-emerald-950/50 to-emerald-900/10 text-emerald-400 border-l-4 border-emerald-500 shadow-sm"
+                    ? "bg-gradient-to-r from-brand-violet/50 to-brand-violet/10 text-brand-cyan border-l-4 border-brand-blue shadow-sm"
                     : "text-slate-400 hover:text-white hover:bg-slate-850/50"
                 }`}
               >
@@ -277,7 +278,7 @@ export default function App() {
       {/* Header - Mobile */}
       <header className="md:hidden flex items-center justify-between p-4 bg-slate-900 border-b border-slate-850 sticky top-0 z-30">
         <div className="flex items-center gap-2">
-          <span className="p-1.5 rounded-lg bg-gradient-to-tr from-emerald-600 to-violet-650 text-white">
+          <span className="p-1.5 rounded-lg bg-gradient-to-tr from-brand-blue to-violet-650 text-white">
             <Sparkles className="w-4 h-4" />
           </span>
           <span className="text-lg font-black text-white tracking-widest font-mono">EVOLV</span>
@@ -310,7 +311,7 @@ export default function App() {
                   }}
                   className={`flex items-center gap-2.5 p-3 rounded-xl text-xs font-bold uppercase tracking-wide transition-all ${
                     activeTab === tab.id
-                      ? "bg-emerald-950/40 text-emerald-400 border-l-2 border-emerald-500"
+                      ? "bg-brand-violet/40 text-brand-cyan border-l-2 border-brand-blue"
                       : "text-slate-400 hover:text-white hover:bg-slate-850/50"
                   }`}
                 >

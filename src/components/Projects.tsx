@@ -81,7 +81,7 @@ export default function Projects({ projects, onAddProject, onDeleteProject, onUp
     switch (stat) {
       case "Em produção":
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-950/40 text-emerald-400 border border-emerald-900/20">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-brand-violet/40 text-brand-cyan border border-brand-violet/20">
             <Rocket className="w-3.5 h-3.5" />
             Em produção
           </span>

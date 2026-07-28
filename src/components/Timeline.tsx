@@ -36,7 +36,7 @@ export default function Timeline({ experiences }: TimelineProps) {
       {/* Header */}
       <div className="p-6 rounded-xl bg-slate-900/60 border border-slate-850 space-y-2 text-center md:text-left">
         <h1 className="text-2xl font-extrabold text-white tracking-tight flex items-center justify-center md:justify-start gap-2">
-          <Milestone className="w-6 h-6 text-emerald-400" />
+          <Milestone className="w-6 h-6 text-brand-cyan" />
           Linha do Tempo Profissional
         </h1>
         <p className="text-slate-400 text-sm max-w-2xl">
@@ -60,7 +60,7 @@ export default function Timeline({ experiences }: TimelineProps) {
                 onClick={() => setSelectedYear(year)}
                 className={`px-4 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider border transition-all ${
                   selectedYear === year
-                    ? "bg-emerald-900/30 text-emerald-400 border-emerald-800"
+                    ? "bg-brand-violet/30 text-brand-cyan border-brand-violet"
                     : "bg-slate-950 text-slate-400 border-slate-850 hover:border-slate-800 hover:text-slate-300"
                 }`}
               >
@@ -73,7 +73,7 @@ export default function Timeline({ experiences }: TimelineProps) {
           <div className="relative pl-6 md:pl-10 space-y-12 pb-10">
 
             {/* Main Vertical Axis line */}
-            <div className="absolute left-[27px] md:left-[35px] top-4 bottom-4 w-[2px] bg-gradient-to-b from-emerald-500/80 via-violet-500/60 to-slate-800" />
+            <div className="absolute left-[27px] md:left-[35px] top-4 bottom-4 w-[2px] bg-gradient-to-b from-brand-blue/80 via-violet-500/60 to-slate-800" />
 
             {/* Outer Loop over Years that actually have experiences */}
             {yearsWithData.map((year) => {
@@ -85,7 +85,7 @@ export default function Timeline({ experiences }: TimelineProps) {
                 <div key={year} className="space-y-6 relative">
 
                   {/* Year Ring Icon */}
-                  <div className="absolute -left-[39px] md:-left-[47px] top-0 w-8 h-8 rounded-full bg-slate-950 border-2 border-emerald-500 flex items-center justify-center z-10 shadow-lg shadow-emerald-950/50">
+                  <div className="absolute -left-[39px] md:-left-[47px] top-0 w-8 h-8 rounded-full bg-slate-950 border-2 border-brand-blue flex items-center justify-center z-10 shadow-lg shadow-brand-violet/50">
                     <span className="text-[10px] font-extrabold text-white">{year}</span>
                   </div>
 
@@ -121,7 +121,7 @@ export default function Timeline({ experiences }: TimelineProps) {
                           <p className="text-xs text-slate-400 pl-4 leading-relaxed font-sans">{exp.description}</p>
 
                           {exp.result && (
-                            <div className="ml-4 p-2.5 bg-emerald-950/15 border border-emerald-950/30 rounded-lg text-emerald-400 text-[11px] leading-relaxed">
+                            <div className="ml-4 p-2.5 bg-brand-violet/15 border border-brand-violet/30 rounded-lg text-brand-cyan text-[11px] leading-relaxed">
                               <strong>Impacto Real:</strong> {exp.result}
                             </div>
                           )}
