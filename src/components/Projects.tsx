@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Project } from "../types";
-import { Briefcase, ToggleLeft, Save, Plus, Trash2, Edit2, Code, Hammer, Rocket, Layout, X } from "lucide-react";
+import { Briefcase, ToggleLeft, Save, Plus, Trash2, Edit2, Code, Hammer, Rocket, Layout, X, Filter, Building2, User } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
 interface ProjectsProps {
@@ -14,11 +14,13 @@ export default function Projects({ projects, onAddProject, onDeleteProject, onUp
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
   const [status, setStatus] = useState<"Em produção" | "Em desenvolvimento" | "Planejado">("Em desenvolvimento");
+  const [origem, setOrigem] = useState<"corporativo" | "pessoal">("corporativo");
   const [techInput, setTechInput] = useState("");
   const [technologies, setTechnologies] = useState<string[]>([]);
   const [description, setDescription] = useState("");
   const [isFormExpanded, setIsFormExpanded] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [originFilter, setOriginFilter] = useState<"Todos" | "Corporativo" | "Pessoal">("Todos");
 
   const handleAddTech = () => {
     if (techInput.trim() && !technologies.includes(techInput.trim())) {
@@ -35,6 +37,7 @@ export default function Projects({ projects, onAddProject, onDeleteProject, onUp
     setName("");
     setCategory("");
     setStatus("Em desenvolvimento");
+    setOrigem("corporativo");
     setTechInput("");
     setTechnologies([]);
     setDescription("");
@@ -53,6 +56,7 @@ export default function Projects({ projects, onAddProject, onDeleteProject, onUp
       name: name.trim(),
       category: category.trim() || "Geral",
       status,
+      origem,
       technologies,
       description: description.trim()
     };
@@ -71,6 +75,7 @@ export default function Projects({ projects, onAddProject, onDeleteProject, onUp
     setName(proj.name);
     setCategory(proj.category);
     setStatus(proj.status);
+    setOrigem(proj.origem);
     setTechnologies(proj.technologies || []);
     setDescription(proj.description || "");
     setIsFormExpanded(true);
@@ -102,6 +107,29 @@ export default function Projects({ projects, onAddProject, onDeleteProject, onUp
         );
     }
   };
+
+  const getOrigemBadge = (org: string) => {
+    if (org === "pessoal") {
+      return (
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700">
+          <User className="w-3.5 h-3.5" />
+          Pessoal
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700">
+        <Building2 className="w-3.5 h-3.5" />
+        Corporativo
+      </span>
+    );
+  };
+
+  const filteredProjects = projects.filter(proj => {
+    if (originFilter === "Todos") return true;
+    if (originFilter === "Corporativo") return proj.origem === "corporativo";
+    return proj.origem === "pessoal";
+  });
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -169,6 +197,29 @@ export default function Projects({ projects, onAddProject, onDeleteProject, onUp
                     }`}
                   >
                     {s}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300">Origem do Projeto</label>
+              <div className="grid grid-cols-2 gap-2">
+                {([
+                  { value: "corporativo", label: "Corporativo" },
+                  { value: "pessoal", label: "Pessoal" },
+                ] as const).map(opt => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setOrigem(opt.value)}
+                    className={`min-h-[2.75rem] px-1 py-1.5 flex items-center justify-center text-center border text-[9px] font-bold tracking-tight uppercase leading-tight rounded-md transition-all ${
+                      origem === opt.value
+                        ? "bg-violet-900/30 text-violet-400 border-violet-800"
+                        : "bg-slate-950 text-slate-400 border-slate-850 hover:border-slate-800"
+                    }`}
+                  >
+                    {opt.label}
                   </button>
                 ))}
               </div>
@@ -246,14 +297,36 @@ export default function Projects({ projects, onAddProject, onDeleteProject, onUp
 
       {/* Right Column: Projects List */}
       <div className="lg:col-span-8 space-y-4">
-        <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-850 flex items-center justify-between">
-          <h2 className="text-sm font-bold text-white uppercase tracking-wider">Catálogo de Projetos ({projects.length})</h2>
-          <span className="text-[11px] text-slate-500 font-mono">Status em Tempo Real</span>
+        <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-850 flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
+          <div className="flex items-center justify-between md:justify-start gap-3">
+            <h2 className="text-sm font-bold text-white uppercase tracking-wider">Catálogo de Projetos ({filteredProjects.length})</h2>
+            <span className="text-[11px] text-slate-500 font-mono hidden md:inline">Status em Tempo Real</span>
+          </div>
+
+          <div className="flex flex-wrap gap-1.5 items-center md:justify-end">
+            <span className="text-[10px] uppercase font-semibold text-slate-500 mr-1 flex items-center gap-1">
+              <Filter className="w-3.5 h-3.5" />
+              Filtrar por:
+            </span>
+            {(["Todos", "Corporativo", "Pessoal"] as const).map(opt => (
+              <button
+                key={opt}
+                onClick={() => setOriginFilter(opt)}
+                className={`px-3 py-1 rounded-md text-[10px] font-semibold tracking-wider uppercase border transition-all ${
+                  originFilter === opt
+                    ? "bg-brand-violet/30 text-brand-cyan border-brand-violet"
+                    : "bg-slate-950 text-slate-400 border-slate-850 hover:border-slate-800 hover:text-slate-300"
+                }`}
+              >
+                {opt}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <AnimatePresence>
-            {projects.map((proj, index) => (
+            {filteredProjects.map((proj, index) => (
               <motion.div
                 key={proj.id}
                 initial={{ opacity: 0, y: 15 }}
@@ -289,7 +362,10 @@ export default function Projects({ projects, onAddProject, onDeleteProject, onUp
                     </div>
                   </div>
 
-                  {getStatusBadge(proj.status)}
+                  <div className="flex flex-wrap gap-1.5">
+                    {getStatusBadge(proj.status)}
+                    {getOrigemBadge(proj.origem)}
+                  </div>
 
                   <p className="text-xs text-slate-400 line-clamp-3 leading-relaxed font-sans">{proj.description}</p>
                 </div>

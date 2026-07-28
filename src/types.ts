@@ -26,6 +26,7 @@ export interface Project {
   status: "Em produção" | "Em desenvolvimento" | "Planejado";
   technologies: string[];
   description: string;
+  origem: "corporativo" | "pessoal";
 }
 
 export interface CareerStats {
