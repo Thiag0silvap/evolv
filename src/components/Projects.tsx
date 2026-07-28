@@ -260,7 +260,7 @@ export default function Projects({ projects, onAddProject, onDeleteProject, onUp
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.25, delay: index * 0.05 }}
-                className="p-5 rounded-2xl bg-slate-900/60 border border-slate-850 hover:border-slate-800 transition-all flex flex-col justify-between h-64 group relative"
+                className="p-5 rounded-2xl bg-slate-900/60 border border-slate-850 hover:border-slate-800 transition-all flex flex-col justify-between min-h-64 group relative"
               >
                 <div className="space-y-2.5">
                   <div className="flex justify-between items-start gap-4">
