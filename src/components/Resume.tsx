@@ -13,7 +13,9 @@ import {
   Briefcase,
   Layers,
   ChevronRight,
-  RefreshCw
+  RefreshCw,
+  FileDown,
+  Loader2
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -38,6 +40,7 @@ export default function Resume({ experiences, projects }: ResumeProps) {
   const [generatedMarkdown, setGeneratedMarkdown] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [exportingFormat, setExportingFormat] = useState<"pdf" | "docx" | null>(null);
   const [copySuccess, setCopySuccess] = useState(false);
 
   // Toggle selection
@@ -107,6 +110,46 @@ export default function Resume({ experiences, projects }: ResumeProps) {
     navigator.clipboard.writeText(generatedMarkdown);
     setCopySuccess(true);
     setTimeout(() => setCopySuccess(false), 2000);
+  };
+
+  // Export compiled resume as PDF or DOCX via backend
+  const handleExport = async (format: "pdf" | "docx") => {
+    if (!generatedMarkdown) return;
+    setExportingFormat(format);
+    setError(null);
+
+    try {
+      const filteredExperiences = experiences.filter(e => selectedExpIds.includes(e.id));
+      const response = await fetch(`/api/gemini/export-resume-${format}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          markdown: generatedMarkdown,
+          targetRole,
+          experiences: filteredExperiences
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Erro no servidor ao exportar currículo em ${format.toUpperCase()}.`);
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const element = document.createElement("a");
+      element.href = url;
+      element.download = `curriculo_${targetRole.toLowerCase().replace(/[^a-z0-9]/g, "_")}.${format}`;
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+      URL.revokeObjectURL(url);
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || `Não foi possível exportar o currículo em ${format.toUpperCase()}.`);
+    } finally {
+      setExportingFormat(null);
+    }
   };
 
   // Helper download file
@@ -265,6 +308,30 @@ export default function Resume({ experiences, projects }: ResumeProps) {
               >
                 <Printer className="w-3.5 h-3.5" />
                 <span>Imprimir</span>
+              </button>
+              <button
+                onClick={() => handleExport("pdf")}
+                disabled={exportingFormat !== null}
+                className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 disabled:bg-slate-850 disabled:text-slate-600 text-white text-xs font-medium rounded-lg border border-slate-700 transition-colors flex items-center gap-1.5"
+              >
+                {exportingFormat === "pdf" ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <FileDown className="w-3.5 h-3.5" />
+                )}
+                <span>PDF</span>
+              </button>
+              <button
+                onClick={() => handleExport("docx")}
+                disabled={exportingFormat !== null}
+                className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 disabled:bg-slate-850 disabled:text-slate-600 text-white text-xs font-medium rounded-lg border border-slate-700 transition-colors flex items-center gap-1.5"
+              >
+                {exportingFormat === "docx" ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <FileDown className="w-3.5 h-3.5" />
+                )}
+                <span>Word</span>
               </button>
             </div>
           </div>

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Experience, Project, CategoryType } from "../types";
+import ImportResume from "./ImportResume";
 import { 
   Sparkles, 
   Trash2, 
@@ -213,6 +214,8 @@ export default function Experiences({
       
       {/* Left Column: Log Daily Experience Form */}
       <div className="xl:col-span-5 space-y-6">
+        <ImportResume onAddExperience={onAddExperience} />
+
         <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-850 space-y-6 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-600/5 rounded-full blur-2xl pointer-events-none"></div>
           
