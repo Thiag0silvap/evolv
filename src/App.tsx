@@ -312,7 +312,7 @@ export default function App() {
       {/* Sidebar Navigation - Desktop */}
       <aside
         style={{ width: `${sidebarRenderedWidth}px` }}
-        className={`hidden md:flex flex-col bg-slate-900 border-r border-slate-850 shrink-0 p-5 sticky top-0 h-screen z-20 relative ${
+        className={`hidden md:flex flex-col bg-slate-900 border border-slate-850 shrink-0 p-5 sticky top-4 ml-4 h-[calc(100vh-2rem)] rounded-2xl shadow-2xl shadow-black/30 z-20 relative ${
           isResizingSidebar ? "" : "transition-[width] duration-300 ease-out"
         }`}
       >
@@ -328,26 +328,31 @@ export default function App() {
         </div>
 
         {/* Scrollable top area: logo, profile, nav */}
-        <div className="flex-1 min-h-0 overflow-y-auto scrollbar-hide space-y-8">
-          {/* Logo Brand Title — clickable to collapse/expand the sidebar */}
-          <button
-            type="button"
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            title={sidebarCollapsed ? "Expandir menu" : "Recolher menu"}
-            className={`w-full flex items-center ${sidebarShowLabels ? "gap-2.5" : "justify-center"} px-2 cursor-pointer hover:opacity-80 active:scale-95 transition-all`}
-          >
-            <img src={evolvIcon} alt="Evolv" className="w-8 h-8 shrink-0 object-contain" />
-            {sidebarShowLabels && (
-              <span className="text-lg font-bold text-white tracking-tight font-sans">EVOLV</span>
-            )}
-          </button>
+        <div className="flex-1 min-h-0 overflow-y-auto scrollbar-hide space-y-6">
+          {/* Logo Brand Title — its own highlighted box, clickable to
+              collapse/expand the sidebar, set apart from the rest of the
+              menu by a divider below it */}
+          <div className="space-y-4">
+            <button
+              type="button"
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              title={sidebarCollapsed ? "Expandir menu" : "Recolher menu"}
+              className={`w-full flex items-center ${sidebarShowLabels ? "gap-2.5 px-3" : "justify-center px-2"} py-3 rounded-xl bg-slate-850/50 border border-slate-800/60 cursor-pointer hover:opacity-80 active:scale-95 transition-all`}
+            >
+              <img src={evolvIcon} alt="Evolv" className="w-8 h-8 shrink-0 object-contain" />
+              {sidebarShowLabels && (
+                <span className="text-lg font-bold text-white tracking-tight font-sans">EVOLV</span>
+              )}
+            </button>
+            <div className="border-t border-slate-850/60" />
+          </div>
 
           {/* User Profile Badge — the bordered/bg wrapper only makes sense
               when it also holds the name/title text; collapsed, render the
               bare avatar circle so it doesn't look like a shape nested
               inside another shape. */}
           {sidebarShowLabels ? (
-            <div className="py-2.5 px-3 bg-slate-950/40 border border-slate-800/80 rounded-xl flex items-center gap-3">
+            <div className="py-3 px-3 bg-slate-850/50 border border-slate-800/60 rounded-xl flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-slate-850 border border-white/10 flex items-center justify-center text-xs font-bold text-brand-cyan shrink-0">
                 {(userName || "?").charAt(0).toUpperCase()}
               </div>
@@ -368,8 +373,8 @@ export default function App() {
             </div>
           )}
 
-          {/* Nav List */}
-          <nav className="space-y-1">
+          {/* Nav List — each tab its own rounded, individually spaced pill */}
+          <nav className="space-y-1.5">
             {tabs.map(tab => (
               <button
                 key={tab.id}
@@ -380,12 +385,12 @@ export default function App() {
                   setHoveredNavTooltip({ id: tab.id, label: tab.label, top: rect.top + rect.height / 2, left: rect.right + 8 });
                 }}
                 onMouseLeave={() => setHoveredNavTooltip(null)}
-                className={`w-full flex items-center gap-3 px-3.5 py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
+                className={`w-full flex items-center gap-3 px-3.5 py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all border ${
                   sidebarShowLabels ? "" : "justify-center"
                 } ${
                   activeTab === tab.id
-                    ? "bg-gradient-to-r from-brand-violet/50 to-brand-violet/10 text-brand-cyan border-l-4 border-brand-blue shadow-sm"
-                    : "text-slate-400 hover:text-white hover:bg-slate-850/50"
+                    ? "bg-brand-violet/30 text-brand-cyan border-brand-violet shadow-sm"
+                    : "text-slate-400 border-transparent hover:text-white hover:bg-slate-850/50"
                 }`}
               >
                 {tab.icon}
@@ -399,7 +404,7 @@ export default function App() {
         <div className="shrink-0 space-y-4 pt-5 border-t border-slate-850/80">
           <button
             onClick={handleSignOut}
-            className={`w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg bg-slate-950/60 hover:bg-red-950/20 text-slate-500 hover:text-red-400 border border-slate-850 hover:border-red-950/40 text-[10px] font-bold uppercase tracking-wider transition-all`}
+            className={`w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-slate-950/60 hover:bg-red-950/20 text-slate-500 hover:text-red-400 border border-slate-850 hover:border-red-950/40 text-[10px] font-bold uppercase tracking-wider transition-all`}
             title="Sair da conta"
           >
             <LogOut className="w-3.5 h-3.5 shrink-0" />
