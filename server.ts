@@ -290,6 +290,99 @@ Diretrizes:
   }
 });
 
+// Categorias de habilidade exibidas na tela de Habilidades, com uma frase-guia
+// para orientar a classificação do modelo (distintas das categorias de Experience)
+const SKILL_CATEGORIES = [
+  "Desenvolvimento",
+  "Banco de Dados",
+  "Segurança & Redes",
+  "Infraestrutura",
+  "Automação",
+  "Habilidade Geral",
+] as const;
+type SkillCategory = (typeof SKILL_CATEGORIES)[number];
+
+const SKILL_CATEGORY_HINTS: Record<SkillCategory, string> = {
+  "Desenvolvimento": "linguagens de programação, frameworks e construção de software/apps",
+  "Banco de Dados": "bancos de dados, SQL, modelagem de dados e performance de consultas",
+  "Segurança & Redes": "firewalls, VPNs, redes corporativas e cibersegurança",
+  "Infraestrutura": "servidores, virtualização, sistemas operacionais e gestão de infraestrutura de TI",
+  "Automação": "scripts, automação de processos e ferramentas de produtividade",
+  "Habilidade Geral": "competências transversais ou que não se encaixam claramente nas categorias técnicas acima",
+};
+
+// Endpoint: AI-assisted categorization of skill names into the fixed set of skill categories
+app.post("/api/gemini/categorize-skills", async (req, res) => {
+  try {
+    const { skillNames } = req.body;
+    if (!Array.isArray(skillNames) || skillNames.length === 0 || !skillNames.every(n => typeof n === "string")) {
+      return res.status(400).json({ error: "skillNames deve ser uma lista não vazia de strings." });
+    }
+
+    const ai = getGeminiClient();
+    const systemPrompt = `Você é o assistente de inteligência de carreira Evolv.
+Classifique cada habilidade técnica ou competência informada em exatamente UMA das categorias abaixo, escolhendo sempre a que melhor descreve a habilidade:
+${SKILL_CATEGORIES.map(cat => `- "${cat}": ${SKILL_CATEGORY_HINTS[cat]}.`).join("\n")}
+Responda apenas com as categorias exatamente como escritas acima.`;
+
+    const prompt = `Classifique as seguintes habilidades:
+${skillNames.map(n => `- ${n}`).join("\n")}`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3.5-flash",
+      contents: prompt,
+      config: {
+        systemInstruction: systemPrompt,
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            categorizations: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  name: {
+                    type: Type.STRING,
+                    description: "O nome da habilidade exatamente como foi informado.",
+                  },
+                  category: {
+                    type: Type.STRING,
+                    description: `Uma destas categorias exatas: ${SKILL_CATEGORIES.join(", ")}.`,
+                  },
+                },
+                required: ["name", "category"],
+              },
+            },
+          },
+          required: ["categorizations"],
+        },
+      },
+    });
+
+    const resultText = response.text;
+    if (!resultText) {
+      throw new Error("Não foi possível categorizar as habilidades com o modelo Gemini.");
+    }
+
+    const parsed = JSON.parse(resultText);
+    const categorizations: { name: string; category: string }[] = parsed.categorizations || [];
+
+    // Defensive: only accept categories from the fixed set, otherwise fall back
+    const categories: Record<string, string> = {};
+    categorizations.forEach(({ name, category }) => {
+      categories[name] = (SKILL_CATEGORIES as readonly string[]).includes(category)
+        ? category
+        : "Habilidade Geral";
+    });
+
+    res.json({ categories });
+  } catch (error: any) {
+    console.error("Erro na API /api/gemini/categorize-skills:", error);
+    res.status(500).json({ error: error.message || "Erro ao categorizar habilidades com a IA." });
+  }
+});
+
 // --- Importação de currículo (upload PDF/DOCX -> extração de texto -> estruturação via IA) ---
 
 const resumeUpload = multer({
