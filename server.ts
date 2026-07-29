@@ -251,45 +251,6 @@ Diretrizes:
   }
 });
 
-// Endpoint: AI Cover Letter generation
-app.post("/api/gemini/cover-letter", async (req, res) => {
-  try {
-    const { targetRole, company, experiences } = req.body;
-    if (!targetRole) {
-      return res.status(400).json({ error: "Cargo alvo é obrigatório." });
-    }
-
-    const ai = getGeminiClient();
-    const systemPrompt = `Você é um redator profissional de carreiras da Evolv.
-Escreva uma carta de apresentação elegante, persuasiva e personalizada para uma vaga de tecnologia.`;
-
-    const prompt = `Escreva uma carta de apresentação em Markdown para a seguinte vaga:
-**Cargo Alvo:** ${targetRole}
-**Empresa Destino:** ${company || "Empresa de Tecnologia"}
-
-Utilize o histórico de experiências resumido para criar conexões sólidas de valor:
-${JSON.stringify(experiences, null, 2)}
-
-Diretrizes:
-- Escreva em tom profissional, respeitoso e confiante.
-- Divida em: Saudação, Introdução atraente, Parágrafos de desenvolvimento destacando conquistas técnicas e resultados do histórico, Conclusão com chamada para conversa, e Assinatura.
-- Mantenha o texto com cerca de 300 a 400 palavras.`;
-
-    const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
-      contents: prompt,
-      config: {
-        systemInstruction: systemPrompt,
-      },
-    });
-
-    res.json({ letter: response.text });
-  } catch (error: any) {
-    console.error("Erro na API /api/gemini/cover-letter:", error);
-    res.status(500).json({ error: error.message || "Erro ao gerar carta de apresentação." });
-  }
-});
-
 // Categorias de habilidade exibidas na tela de Habilidades, com uma frase-guia
 // para orientar a classificação do modelo (distintas das categorias de Experience)
 const SKILL_CATEGORIES = [
