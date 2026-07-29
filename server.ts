@@ -71,21 +71,44 @@ app.get("/api/health", (req, res) => {
 // Endpoint: AI Suggestions for experience details
 app.post("/api/gemini/suggest", async (req, res) => {
   try {
-    const { description } = req.body;
+    const { description, projectContext } = req.body;
     if (!description || typeof description !== "string") {
       return res.status(400).json({ error: "Descrição é obrigatória." });
     }
 
     const ai = getGeminiClient();
-    const systemPrompt = `Você é o assistente de inteligência de carreira Evolv. 
+    const systemPrompt = `Você é o assistente de inteligência de carreira Evolv.
 Analise a experiência/atividade diária descrita pelo usuário e sugira detalhes profissionais estruturados de alta qualidade.
 Identifique tecnologias reais comuns de TI mencionadas ou implícitas (por exemplo, se mencionar "regra de firewall" e "redes", pode sugerir "PFSense", "Fortinet", "Cisco", "TCP/IP" ou "Infraestrutura").
 Categorias válidas: "Automação", "Infraestrutura", "Desenvolvimento", "Banco de Dados", "Segurança", "Gestão/Agile", "Outros".`;
 
-    const prompt = `Analise a seguinte experiência relatada:
+    let prompt = `Analise a seguinte experiência relatada:
 "${description}"
 
 Gere as seguintes sugestões estruturadas baseadas nela. Seja preciso e evite respostas vagas.`;
+
+    if (projectContext && typeof projectContext === "object") {
+      const { name, description: projectDescription, technologies: projectTechnologies } = projectContext;
+      const contextLines: string[] = [];
+      if (typeof name === "string" && name.trim()) {
+        contextLines.push(`Nome do projeto: ${name.trim()}`);
+      }
+      if (typeof projectDescription === "string" && projectDescription.trim()) {
+        contextLines.push(`Descrição geral do projeto: ${projectDescription.trim()}`);
+      }
+      if (Array.isArray(projectTechnologies) && projectTechnologies.length > 0) {
+        contextLines.push(`Tecnologias do projeto: ${projectTechnologies.join(", ")}`);
+      }
+
+      if (contextLines.length > 0) {
+        prompt += `
+
+CONTEXTO DE FUNDO DO PROJETO (informação geral sobre o projeto como um todo, NÃO é o que foi feito especificamente hoje — use apenas como pano de fundo):
+${contextLines.join("\n")}
+
+IMPORTANTE: o relato do usuário acima é o que efetivamente aconteceu e deve ser priorizado nas sugestões de título e de métrica de impacto/resultado. As tecnologias do projeto podem reforçar as sugestões de tecnologias e competências, mas não invente conquistas, métricas ou resultados que não estejam no relato do usuário.`;
+      }
+    }
 
     const response = await ai.models.generateContent({
       model: "gemini-3.5-flash",

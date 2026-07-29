@@ -86,10 +86,23 @@ export default function Experiences({
     setAiError(null);
 
     try {
+      const selectedProject = !showCustomProjectInput
+        ? projects.find(p => p.name === project)
+        : undefined;
+
       const response = await fetch("/api/gemini/suggest", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ description })
+        body: JSON.stringify({
+          description,
+          ...(selectedProject && {
+            projectContext: {
+              name: selectedProject.name,
+              description: selectedProject.description,
+              technologies: selectedProject.technologies
+            }
+          })
+        })
       });
 
       if (!response.ok) {
