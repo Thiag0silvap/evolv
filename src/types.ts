@@ -27,6 +27,7 @@ export interface Project {
   technologies: string[];
   description: string;
   origem: "corporativo" | "pessoal";
+  created_at?: string;
 }
 
 export interface CareerStats {

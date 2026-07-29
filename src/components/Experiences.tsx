@@ -38,6 +38,8 @@ const CATEGORIES: CategoryType[] = [
   "Outros"
 ];
 
+const CUSTOM_PROJECT_OPTION = "__custom__";
+
 export default function Experiences({ 
   experiences, 
   projects, 
@@ -50,12 +52,20 @@ export default function Experiences({
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState<CategoryType>("Desenvolvimento");
   const [project, setProject] = useState("");
+  const [showCustomProjectInput, setShowCustomProjectInput] = useState(true);
   const [techInput, setTechInput] = useState("");
   const [technologies, setTechnologies] = useState<string[]>([]);
   const [result, setResult] = useState("");
   const [competencies, setCompetencies] = useState<string[]>([]);
   const [competencyInput, setCompetencyInput] = useState("");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+
+  // Projects available for linking, most recently created first
+  const sortedProjects = [...projects].sort((a, b) => {
+    const aTime = a.created_at ? new Date(a.created_at).getTime() : 0;
+    const bTime = b.created_at ? new Date(b.created_at).getTime() : 0;
+    return bTime - aTime;
+  });
 
   // UI States
   const [isAiLoading, setIsAiLoading] = useState(false);
@@ -96,7 +106,15 @@ export default function Experiences({
       } else {
         setCategory("Outros");
       }
-      setProject(data.project || "");
+      const suggestedProject = data.project || "";
+      const matchedProject = projects.find(p => p.name === suggestedProject);
+      if (matchedProject) {
+        setProject(matchedProject.name);
+        setShowCustomProjectInput(false);
+      } else {
+        setProject(suggestedProject);
+        setShowCustomProjectInput(true);
+      }
       setTechnologies(data.technologies || []);
       setResult(data.result || "");
       setCompetencies(data.competencies || []);
@@ -140,6 +158,7 @@ export default function Experiences({
     setTitle("");
     setCategory("Desenvolvimento");
     setProject("");
+    setShowCustomProjectInput(true);
     setTechInput("");
     setTechnologies([]);
     setResult("");
@@ -182,7 +201,14 @@ export default function Experiences({
     setEditingId(exp.id);
     setTitle(exp.title);
     setDescription(exp.description);
-    setProject(exp.project);
+    const matchedProject = projects.find(p => p.name === exp.project);
+    if (matchedProject) {
+      setProject(matchedProject.name);
+      setShowCustomProjectInput(false);
+    } else {
+      setProject(exp.project);
+      setShowCustomProjectInput(true);
+    }
     setCategory(exp.category);
     setTechnologies(exp.technologies || []);
     setResult(exp.result || "");
@@ -347,16 +373,52 @@ export default function Experiences({
                     </div>
                   </div>
 
-                  {/* Project name */}
+                  {/* Project link */}
                   <div className="space-y-1.5">
                     <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300">Projeto Corporativo / Contexto</label>
-                    <input
-                      type="text"
-                      value={project}
-                      onChange={(e) => setProject(e.target.value)}
-                      placeholder="Ex: Plataforma Financeira ou Geral"
+                    <select
+                      value={showCustomProjectInput ? CUSTOM_PROJECT_OPTION : project}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === CUSTOM_PROJECT_OPTION) {
+                          setShowCustomProjectInput(true);
+                          setProject("");
+                        } else {
+                          setShowCustomProjectInput(false);
+                          setProject(val);
+
+                          const selectedProject = projects.find(p => p.name === val);
+                          if (selectedProject?.technologies && selectedProject.technologies.length > 0) {
+                            setTechnologies(prev => {
+                              const existingLower = new Set(prev.map(t => t.toLowerCase()));
+                              const toAdd = selectedProject.technologies.filter(
+                                t => !existingLower.has(t.toLowerCase())
+                              );
+                              return [...prev, ...toAdd];
+                            });
+                          }
+                          if (selectedProject?.description?.trim()) {
+                            setDescription(prev => (prev.trim() ? prev : selectedProject.description));
+                          }
+                        }
+                      }}
                       className="w-full bg-slate-950 border border-slate-800 focus:border-brand-blue rounded-lg px-3 py-2 text-slate-200 text-xs focus:outline-none transition-colors"
-                    />
+                    >
+                      <option value={CUSTOM_PROJECT_OPTION}>Nenhum projeto / outro</option>
+                      {sortedProjects.map(p => (
+                        <option key={p.id} value={p.name}>{p.name}</option>
+                      ))}
+                    </select>
+
+                    {showCustomProjectInput && (
+                      <input
+                        type="text"
+                        value={project}
+                        onChange={(e) => setProject(e.target.value)}
+                        placeholder="Ex: Plataforma Financeira ou Geral"
+                        className="w-full bg-slate-950 border border-slate-800 focus:border-brand-blue rounded-lg px-3 py-2 text-slate-200 text-xs focus:outline-none transition-colors"
+                      />
+                    )}
                   </div>
 
                   {/* Technologies tags input */}
