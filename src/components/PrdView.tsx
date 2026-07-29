@@ -12,7 +12,6 @@ import {
   ShieldAlert,
   Award
 } from "lucide-react";
-import { initialPrdText } from "../data";
 import { motion } from "motion/react";
 
 export default function PrdView() {
@@ -41,10 +40,6 @@ export default function PrdView() {
         
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div className="space-y-1.5">
-            <div className="flex items-center gap-1.5 px-3 py-1 bg-brand-violet/40 border border-brand-violet/30 text-brand-cyan text-xs font-semibold rounded-full w-max">
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>Sprint 0 • Concluída</span>
-            </div>
             <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2">
               <FileText className="w-6 h-6 md:w-7 md:h-7 text-brand-cyan" />
               Product Requirements Document (PRD)
@@ -84,7 +79,7 @@ export default function PrdView() {
             <span className="text-slate-500 block">Status:</span>
             <strong className="text-brand-cyan flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-brand-cyan animate-pulse"></span>
-              Aprovado para MVP
+              Em desenvolvimento ativo — MVP expandido
             </strong>
           </div>
           <div>
@@ -164,7 +159,7 @@ export default function PrdView() {
               <ul className="list-disc pl-5 space-y-1">
                 <li><strong className="text-white">Daily Reflection:</strong> Induz o registro técnico humanizado por reflexão rápida ao fim do dia.</li>
                 <li><strong className="text-white">Preenchimento Inteligente:</strong> A IA entra apenas para otimizar textos, extrair tags e sugerir categorizações de TI.</li>
-                <li><strong className="text-white">Módulos Independentes:</strong> Dashboard, Logs, Projetos, Habilidades, Timeline, Currículo e LinkedIn.</li>
+                <li><strong className="text-white">Módulos Independentes:</strong> Dashboard, Experiências, Projetos, Habilidades, Linha do Tempo, Currículo e LinkedIn.</li>
               </ul>
             </div>
           )}
@@ -188,17 +183,9 @@ export default function PrdView() {
               <p>
                 Para simplificar o desenvolvimento e garantir isolamento, adotamos o padrão de <strong className="text-white">Monólito Modular</strong>. Cada funcionalidade reside em um módulo independente, facilitando testes e permitindo escalar para serviços distribuídos no futuro.
               </p>
-              
-              <div className="p-4 bg-slate-950 border border-slate-800 rounded-xl space-y-1.5 font-mono text-[11px] leading-relaxed">
-                <div>src/modules/</div>
-                <div className="pl-4">├── auth/        <span className="text-slate-500"># Identidade corporativa</span></div>
-                <div className="pl-4">├── dashboard/   <span className="text-slate-500"># Bento metrics e scores</span></div>
-                <div className="pl-4">├── experiences/ <span className="text-slate-500"># Logs assistidos por IA</span></div>
-                <div className="pl-4">├── projects/    <span className="text-slate-500"># Cadastro de projetos corporativos</span></div>
-                <div className="pl-4">├── skills/      <span className="text-slate-500"># Motor automático de score</span></div>
-                <div className="pl-4">├── resume/      <span className="text-slate-500"># Compilador de currículo ATS</span></div>
-                <div className="pl-4">└── linkedin/    <span className="text-slate-500"># Gerador de storytelling de rede</span></div>
-              </div>
+              <p>
+                Na prática, isso hoje se traduz em componentes organizados por domínio em <span className="font-mono text-slate-300 bg-slate-950 border border-slate-800 px-1.5 py-0.5 rounded text-xs">src/components/</span> (Dashboard, Experiências, Projetos, Habilidades, Linha do Tempo, Currículo, LinkedIn, Auth), lógica compartilhada extraída para hooks dedicados em <span className="font-mono text-slate-300 bg-slate-950 border border-slate-800 px-1.5 py-0.5 rounded text-xs">src/hooks/</span>, e um backend unificado em <span className="font-mono text-slate-300 bg-slate-950 border border-slate-800 px-1.5 py-0.5 rounded text-xs">server.ts</span>, que expõe as rotas de IA (Gemini) e serve o próprio frontend via Vite no mesmo processo.
+              </p>
             </div>
           )}
         </div>
@@ -222,7 +209,7 @@ export default function PrdView() {
                 As competências nunca são declaradas manualmente pelo usuário para evitar viés opinativo. Elas nascem e escalam organicamente:
               </p>
               <p>
-                Cada experiência registrada com tecnologia "Python" ou habilidade "Automação" adiciona pontos XP de maturidade. Um log com métrica de resultado de alto impacto concede multiplicadores adicionais. O sistema então compila o score global de cada setor em tempo real.
+                Cada experiência registrada com tecnologia "Python" ou habilidade "Automação" adiciona pontos XP de maturidade. Um log com métrica de resultado de alto impacto concede alguns pontos extras de XP. O sistema então compila o score global de cada setor em tempo real.
               </p>
             </div>
           )}
@@ -230,12 +217,17 @@ export default function PrdView() {
 
       </div>
 
-      {/* Checklist box */}
+      {/* Progress box */}
       <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-850 space-y-4">
-        <h3 className="text-base font-bold text-white flex items-center gap-2">
-          <Rocket className="w-5 h-5 text-brand-cyan animate-bounce" />
-          Roteiro de Validação da Startup (Sprint 0)
-        </h3>
+        <div className="space-y-1">
+          <h3 className="text-base font-bold text-white flex items-center gap-2">
+            <Rocket className="w-5 h-5 text-brand-cyan" />
+            Fundamentos do Projeto
+          </h3>
+          <p className="text-xs text-slate-400">
+            Estes itens marcam a base sobre a qual o Evolv foi construído. O desenvolvimento segue ativo e iterativo — novas features e integrações de IA continuam sendo adicionadas além deste baseline inicial.
+          </p>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[
