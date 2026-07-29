@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import type { Session } from "@supabase/supabase-js";
 import { Experience, Project } from "./types";
 import { supabase } from "./supabaseClient";
@@ -28,6 +29,16 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
+// Desktop sidebar resize constants. MIN matches the width the collapsed
+// state already shipped with (icons + comfortable padding); DEFAULT matches
+// the previous fixed expanded width; MAX gives real resizing headroom.
+const SIDEBAR_MIN_WIDTH = 80;
+const SIDEBAR_MAX_WIDTH = 380;
+const SIDEBAR_DEFAULT_WIDTH = 256;
+const SIDEBAR_COLLAPSE_THRESHOLD = 130;
+const SIDEBAR_WIDTH_KEY = "evolv-sidebar-width";
+const SIDEBAR_COLLAPSED_KEY = "evolv-sidebar-collapsed";
+
 export default function App() {
   // Auth session
   const [session, setSession] = useState<Session | null>(null);
@@ -36,7 +47,36 @@ export default function App() {
   // Navigation active tab
   const [activeTab, setActiveTab] = useState<string>("dashboard");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  // Desktop sidebar: resizable width + collapsed flag, both persisted
+  // locally. `sidebarWidth` always holds the last *expanded* width —
+  // collapsing never overwrites it, so double-click / drag-out restores
+  // exactly where the user left it.
+  const [sidebarWidth, setSidebarWidth] = useState<number>(() => {
+    try {
+      const stored = Number(localStorage.getItem(SIDEBAR_WIDTH_KEY));
+      if (!Number.isNaN(stored) && stored > 0) {
+        return Math.min(SIDEBAR_MAX_WIDTH, Math.max(SIDEBAR_MIN_WIDTH, stored));
+      }
+    } catch {
+      // localStorage unavailable — fall back to default
+    }
+    return SIDEBAR_DEFAULT_WIDTH;
+  });
+  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "true";
+    } catch {
+      return false;
+    }
+  });
+  const [isResizingSidebar, setIsResizingSidebar] = useState(false);
+  const [dragWidth, setDragWidth] = useState(sidebarWidth);
+  // Tooltip is portaled to <body> and positioned via getBoundingClientRect,
+  // since the nav list lives inside an overflow-y-auto container that would
+  // otherwise clip an absolutely-positioned tooltip on the x-axis.
+  const [hoveredNavTooltip, setHoveredNavTooltip] = useState<{ id: string; label: string; top: number; left: number } | null>(null);
+  const sidebarDragStartRef = useRef<{ startX: number; startWidth: number } | null>(null);
 
   // Application database states
   const [experiences, setExperiences] = useState<Experience[]>([]);
@@ -55,6 +95,82 @@ export default function App() {
 
     return () => listener.subscription.unsubscribe();
   }, []);
+
+  // Persist sidebar width/collapsed state locally on every change
+  useEffect(() => {
+    try {
+      localStorage.setItem(SIDEBAR_WIDTH_KEY, String(sidebarWidth));
+    } catch {
+      // ignore write failures (private browsing, quota, etc.)
+    }
+  }, [sidebarWidth]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(sidebarCollapsed));
+    } catch {
+      // ignore write failures
+    }
+  }, [sidebarCollapsed]);
+
+  // Drag-to-resize: listens on window only while actively dragging, so the
+  // handlers don't run on every render.
+  useEffect(() => {
+    if (!isResizingSidebar) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const start = sidebarDragStartRef.current;
+      if (!start) return;
+      const next = Math.min(
+        SIDEBAR_MAX_WIDTH,
+        Math.max(SIDEBAR_MIN_WIDTH, start.startWidth + (e.clientX - start.startX))
+      );
+      setDragWidth(next);
+    };
+
+    const handleMouseUp = () => {
+      setIsResizingSidebar(false);
+      sidebarDragStartRef.current = null;
+      setDragWidth(current => {
+        if (current <= SIDEBAR_COLLAPSE_THRESHOLD) {
+          setSidebarCollapsed(true);
+        } else {
+          setSidebarCollapsed(false);
+          setSidebarWidth(current);
+        }
+        return current;
+      });
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [isResizingSidebar]);
+
+  const handleSidebarResizeStart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const startWidth = sidebarCollapsed ? SIDEBAR_MIN_WIDTH : sidebarWidth;
+    sidebarDragStartRef.current = { startX: e.clientX, startWidth };
+    setDragWidth(startWidth);
+    setIsResizingSidebar(true);
+  };
+
+  const handleSidebarHandleDoubleClick = () => {
+    setSidebarCollapsed(prev => !prev);
+  };
+
+  // Live width while dragging, otherwise the committed collapsed/expanded
+  // width. `sidebarShowLabels` also drives label visibility live during a
+  // drag so text doesn't stay hidden/shown out of sync with the handle.
+  const sidebarRenderedWidth = isResizingSidebar
+    ? dragWidth
+    : sidebarCollapsed
+    ? SIDEBAR_MIN_WIDTH
+    : sidebarWidth;
+  const sidebarShowLabels = isResizingSidebar ? dragWidth > SIDEBAR_COLLAPSE_THRESHOLD : !sidebarCollapsed;
 
   // Load experiences/projects from Supabase whenever the session changes
   useEffect(() => {
@@ -195,33 +311,46 @@ export default function App() {
 
       {/* Sidebar Navigation - Desktop */}
       <aside
-        className={`hidden md:flex flex-col ${sidebarCollapsed ? "w-20" : "w-64"} bg-slate-900 border-r border-slate-850 shrink-0 p-5 sticky top-0 h-screen z-20 transition-all duration-200`}
+        style={{ width: `${sidebarRenderedWidth}px` }}
+        className={`hidden md:flex flex-col bg-slate-900 border-r border-slate-850 shrink-0 p-5 sticky top-0 h-screen z-20 relative ${
+          isResizingSidebar ? "" : "transition-[width] duration-300 ease-out"
+        }`}
       >
 
+        {/* Resize handle — drag to resize, double-click to collapse/expand */}
+        <div
+          onMouseDown={handleSidebarResizeStart}
+          onDoubleClick={handleSidebarHandleDoubleClick}
+          title="Arraste para redimensionar · duplo clique para recolher/expandir"
+          className="absolute top-0 right-0 h-full w-2 -mr-1 cursor-col-resize z-30 flex justify-center group/handle"
+        >
+          <div className="w-0.5 h-full bg-transparent group-hover/handle:bg-brand-blue/60 transition-colors" />
+        </div>
+
         {/* Scrollable top area: logo, profile, nav */}
-        <div className="flex-1 min-h-0 overflow-y-auto space-y-8">
+        <div className="flex-1 min-h-0 overflow-y-auto scrollbar-hide space-y-8">
           {/* Logo Brand Title — clickable to collapse/expand the sidebar */}
           <button
             type="button"
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
             title={sidebarCollapsed ? "Expandir menu" : "Recolher menu"}
-            className={`w-full flex items-center ${sidebarCollapsed ? "justify-center" : "gap-2.5"} px-2 cursor-pointer hover:opacity-80 active:scale-95 transition-all`}
+            className={`w-full flex items-center ${sidebarShowLabels ? "gap-2.5" : "justify-center"} px-2 cursor-pointer hover:opacity-80 active:scale-95 transition-all`}
           >
             <img src={evolvIcon} alt="Evolv" className="w-8 h-8 shrink-0 object-contain" />
-            {!sidebarCollapsed && (
+            {sidebarShowLabels && (
               <span className="text-lg font-bold text-white tracking-tight font-sans">EVOLV</span>
             )}
           </button>
 
-          {/* User Profile Badge */}
-          <div className={`py-2.5 bg-slate-950/40 border border-slate-800/80 rounded-xl flex items-center gap-3 ${sidebarCollapsed ? "justify-center px-2" : "px-3"}`}>
-            <div
-              className="w-8 h-8 rounded-full bg-slate-850 border border-white/10 flex items-center justify-center text-xs font-bold text-brand-cyan shrink-0"
-              title={sidebarCollapsed ? userName : undefined}
-            >
-              {(userName || "?").charAt(0).toUpperCase()}
-            </div>
-            {!sidebarCollapsed && (
+          {/* User Profile Badge — the bordered/bg wrapper only makes sense
+              when it also holds the name/title text; collapsed, render the
+              bare avatar circle so it doesn't look like a shape nested
+              inside another shape. */}
+          {sidebarShowLabels ? (
+            <div className="py-2.5 px-3 bg-slate-950/40 border border-slate-800/80 rounded-xl flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-slate-850 border border-white/10 flex items-center justify-center text-xs font-bold text-brand-cyan shrink-0">
+                {(userName || "?").charAt(0).toUpperCase()}
+              </div>
               <div className="min-w-0">
                 <p className="text-[11px] text-slate-300 font-bold uppercase tracking-wider truncate leading-none">
                   {userName}
@@ -230,8 +359,14 @@ export default function App() {
                   {userTitle || session.user.email}
                 </p>
               </div>
-            )}
-          </div>
+            </div>
+          ) : (
+            <div className="flex justify-center" title={userName}>
+              <div className="w-8 h-8 rounded-full bg-slate-850 border border-white/10 flex items-center justify-center text-xs font-bold text-brand-cyan shrink-0">
+                {(userName || "?").charAt(0).toUpperCase()}
+              </div>
+            </div>
+          )}
 
           {/* Nav List */}
           <nav className="space-y-1">
@@ -239,9 +374,14 @@ export default function App() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                title={sidebarCollapsed ? tab.label : undefined}
+                onMouseEnter={(e) => {
+                  if (sidebarShowLabels) return;
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  setHoveredNavTooltip({ id: tab.id, label: tab.label, top: rect.top + rect.height / 2, left: rect.right + 8 });
+                }}
+                onMouseLeave={() => setHoveredNavTooltip(null)}
                 className={`w-full flex items-center gap-3 px-3.5 py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
-                  sidebarCollapsed ? "justify-center" : ""
+                  sidebarShowLabels ? "" : "justify-center"
                 } ${
                   activeTab === tab.id
                     ? "bg-gradient-to-r from-brand-violet/50 to-brand-violet/10 text-brand-cyan border-l-4 border-brand-blue shadow-sm"
@@ -249,7 +389,7 @@ export default function App() {
                 }`}
               >
                 {tab.icon}
-                {!sidebarCollapsed && <span>{tab.label}</span>}
+                {sidebarShowLabels && <span>{tab.label}</span>}
               </button>
             ))}
           </nav>
@@ -263,10 +403,10 @@ export default function App() {
             title="Sair da conta"
           >
             <LogOut className="w-3.5 h-3.5 shrink-0" />
-            {!sidebarCollapsed && <span>Sair</span>}
+            {sidebarShowLabels && <span>Sair</span>}
           </button>
 
-          {!sidebarCollapsed && (
+          {sidebarShowLabels && (
             <div className="text-[10px] text-slate-600 text-center font-mono">
               Evolv Professional v1.0.0
             </div>
@@ -274,6 +414,18 @@ export default function App() {
         </div>
 
       </aside>
+
+      {/* Collapsed sidebar nav tooltip — portaled to <body> so it isn't
+          clipped by the sidebar's overflow-y-auto nav container */}
+      {hoveredNavTooltip && !sidebarShowLabels && createPortal(
+        <span
+          style={{ position: "fixed", top: hoveredNavTooltip.top, left: hoveredNavTooltip.left, transform: "translateY(-50%)" }}
+          className="px-3 py-1.5 rounded-lg bg-slate-850 border border-slate-750 text-white text-xs font-bold uppercase tracking-wider whitespace-nowrap shadow-xl z-50 pointer-events-none"
+        >
+          {hoveredNavTooltip.label}
+        </span>,
+        document.body
+      )}
 
       {/* Header - Mobile */}
       <header className="md:hidden flex items-center justify-between p-4 bg-slate-900 border-b border-slate-850 sticky top-0 z-30">
