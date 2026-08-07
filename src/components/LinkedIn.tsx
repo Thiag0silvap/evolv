@@ -14,6 +14,7 @@ import {
   Heart
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { authFetch } from "../lib/authFetch";
 
 interface LinkedInProps {
   experiences: Experience[];
@@ -45,7 +46,7 @@ export default function LinkedIn({ experiences, userName, userTitle }: LinkedInP
     setCopySuccess(false);
 
     try {
-      const response = await fetch("/api/gemini/linkedin", {
+      const response = await authFetch("/api/gemini/linkedin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ experience: exp, tone })

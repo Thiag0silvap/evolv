@@ -4,6 +4,8 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { createServer as createViteServer } from "vite";
 import dotenv from "dotenv";
 import multer from "multer";
+import { createClient } from "@supabase/supabase-js";
+import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 import { PDFParse } from "pdf-parse";
 import mammoth from "mammoth";
 import pdfMake from "pdfmake";
@@ -22,7 +24,10 @@ import {
 } from "docx";
 import type { CategoryType, Experience } from "./src/types";
 
-dotenv.config();
+// .env holds server-only secrets (GEMINI_API_KEY); .env.local holds the
+// Supabase URL/anon key that Vite also injects client-side under the
+// VITE_ prefix — the server needs the same two values to validate JWTs.
+dotenv.config({ path: [".env", ".env.local"] });
 
 // Categorias válidas de experiência (mesmo enum de src/types.ts) e cores de badge para export
 const CATEGORY_COLORS: Record<CategoryType, string> = {
@@ -36,11 +41,65 @@ const CATEGORY_COLORS: Record<CategoryType, string> = {
 };
 const VALID_CATEGORIES = Object.keys(CATEGORY_COLORS) as CategoryType[];
 
+declare global {
+  namespace Express {
+    interface Request {
+      userId?: string;
+    }
+  }
+}
+
 const app = express();
 const PORT = 3000;
 
 // Body parser
 app.use(express.json());
+
+// Supabase client used only to validate JWTs from the frontend (auth.getUser),
+// never to read/write data — the anon key is enough for that, no service_role
+// key exists anywhere in this project.
+const supabaseUrl = process.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY;
+const supabaseServer =
+  supabaseUrl && supabaseAnonKey ? createClient(supabaseUrl, supabaseAnonKey) : null;
+
+// Every /api/gemini/* route costs real Gemini quota, so it must run behind
+// a logged-in Supabase session — reject before any AI call, file parsing,
+// or document generation happens.
+async function requireAuth(req: express.Request, res: express.Response, next: express.NextFunction) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({ error: "Autenticação necessária." });
+  }
+
+  if (!supabaseServer) {
+    console.error("Servidor sem VITE_SUPABASE_URL/VITE_SUPABASE_ANON_KEY configurados — não é possível validar sessões.");
+    return res.status(500).json({ error: "Servidor não configurado corretamente." });
+  }
+
+  const token = authHeader.slice("Bearer ".length);
+  const { data, error } = await supabaseServer.auth.getUser(token);
+  if (error || !data.user) {
+    return res.status(401).json({ error: "Sessão inválida ou expirada. Faça login novamente." });
+  }
+
+  req.userId = data.user.id;
+  next();
+}
+
+// 20 requisições de IA por hora por usuário autenticado — requireAuth roda
+// antes na cadeia de middlewares, então req.userId já está disponível aqui;
+// IP só entra como fallback defensivo, nunca deveria ser realmente usado.
+const aiRateLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => req.userId || ipKeyGenerator(req.ip || "unknown"),
+  handler: (req, res) => {
+    res.status(429).json({ error: "Limite de 20 requisições de IA por hora atingido. Tente novamente mais tarde." });
+  },
+});
 
 // Initialize Gemini API client lazily
 let aiClient: GoogleGenAI | null = null;
@@ -69,7 +128,7 @@ app.get("/api/health", (req, res) => {
 });
 
 // Endpoint: AI Suggestions for experience details
-app.post("/api/gemini/suggest", async (req, res) => {
+app.post("/api/gemini/suggest", requireAuth, aiRateLimiter, async (req, res) => {
   try {
     const { description, projectContext } = req.body;
     if (!description || typeof description !== "string") {
@@ -165,7 +224,7 @@ IMPORTANTE: o relato do usuário acima é o que efetivamente aconteceu e deve se
 });
 
 // Endpoint: AI Resume generation
-app.post("/api/gemini/resume", async (req, res) => {
+app.post("/api/gemini/resume", requireAuth, aiRateLimiter, async (req, res) => {
   try {
     const { targetRole, experiences, projects, customInstructions } = req.body;
     if (!targetRole) {
@@ -211,7 +270,7 @@ ${JSON.stringify(projects, null, 2)}
 });
 
 // Endpoint: AI LinkedIn Post generation
-app.post("/api/gemini/linkedin", async (req, res) => {
+app.post("/api/gemini/linkedin", requireAuth, aiRateLimiter, async (req, res) => {
   try {
     const { experience, tone } = req.body;
     if (!experience) {
@@ -273,7 +332,7 @@ const SKILL_CATEGORY_HINTS: Record<SkillCategory, string> = {
 };
 
 // Endpoint: AI-assisted categorization of skill names into the fixed set of skill categories
-app.post("/api/gemini/categorize-skills", async (req, res) => {
+app.post("/api/gemini/categorize-skills", requireAuth, aiRateLimiter, async (req, res) => {
   try {
     const { skillNames } = req.body;
     if (!Array.isArray(skillNames) || skillNames.length === 0 || !skillNames.every(n => typeof n === "string")) {
@@ -400,7 +459,7 @@ async function extractTextFromResumeFile(file: Express.Multer.File): Promise<str
 
 // Endpoint: Importar currículo existente (PDF/DOCX) e sugerir experiências estruturadas via IA
 // Apenas retorna o JSON para revisão do usuário — não salva nada no Supabase.
-app.post("/api/gemini/import-resume", uploadResumeFile, async (req, res) => {
+app.post("/api/gemini/import-resume", requireAuth, aiRateLimiter, uploadResumeFile, async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: "Nenhum arquivo enviado. Envie um PDF ou DOCX no campo 'file'." });
@@ -647,7 +706,7 @@ async function generateResumeDocxBuffer(markdown: string, targetRole: string, ex
 }
 
 // Endpoint: Exportar currículo compilado (markdown) como PDF
-app.post("/api/gemini/export-resume-pdf", async (req, res) => {
+app.post("/api/gemini/export-resume-pdf", requireAuth, aiRateLimiter, async (req, res) => {
   try {
     const { markdown, targetRole, experiences } = req.body;
     if (!markdown || typeof markdown !== "string") {
@@ -664,7 +723,7 @@ app.post("/api/gemini/export-resume-pdf", async (req, res) => {
 });
 
 // Endpoint: Exportar currículo compilado (markdown) como DOCX
-app.post("/api/gemini/export-resume-docx", async (req, res) => {
+app.post("/api/gemini/export-resume-docx", requireAuth, aiRateLimiter, async (req, res) => {
   try {
     const { markdown, targetRole, experiences } = req.body;
     if (!markdown || typeof markdown !== "string") {

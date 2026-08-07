@@ -68,7 +68,10 @@ export function useSkillCategories(skillNames: string[]): Record<string, string>
 
         const response = await fetch("/api/gemini/categorize-skills", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${sessionData.session!.access_token}`
+          },
           body: JSON.stringify({ skillNames: uncached })
         });
 

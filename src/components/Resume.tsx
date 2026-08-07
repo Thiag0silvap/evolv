@@ -18,6 +18,7 @@ import {
   Loader2
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { authFetch } from "../lib/authFetch";
 
 interface ResumeProps {
   experiences: Experience[];
@@ -75,7 +76,7 @@ export default function Resume({ experiences, projects }: ResumeProps) {
     const filteredExperiences = experiences.filter(e => selectedExpIds.includes(e.id));
     
     try {
-      const response = await fetch("/api/gemini/resume", {
+      const response = await authFetch("/api/gemini/resume", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -120,7 +121,7 @@ export default function Resume({ experiences, projects }: ResumeProps) {
 
     try {
       const filteredExperiences = experiences.filter(e => selectedExpIds.includes(e.id));
-      const response = await fetch(`/api/gemini/export-resume-${format}`, {
+      const response = await authFetch(`/api/gemini/export-resume-${format}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
