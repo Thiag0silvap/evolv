@@ -30,6 +30,13 @@ export interface Project {
   created_at?: string;
 }
 
+// Batched write instructions produced by the resume-import review screen —
+// processed sequentially so the local `experiences` state is updated once,
+// from a single source of truth, instead of racing on stale closures.
+export type ImportExperienceAction =
+  | { type: "insert"; data: Omit<Experience, "id"> }
+  | { type: "update"; id: string; data: Omit<Experience, "id"> };
+
 export interface CareerStats {
   careerDays: number;
   activeProjects: number;

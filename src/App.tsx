@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import type { Session } from "@supabase/supabase-js";
-import { Experience, Project } from "./types";
+import { Experience, Project, ImportExperienceAction } from "./types";
 import { supabase } from "./supabaseClient";
 import evolvIcon from "../assets/evolv-icon-transparent.png";
 import Auth from "./components/Auth";
@@ -206,7 +206,7 @@ export default function App() {
       alert(error.message);
       return;
     }
-    setExperiences([data as Experience, ...experiences]);
+    setExperiences(prev => [data as Experience, ...prev]);
   };
 
   const handleUpdateExperience = async (updatedExp: Experience) => {
@@ -221,7 +221,50 @@ export default function App() {
       alert(error.message);
       return;
     }
-    setExperiences(experiences.map(e => (e.id === id ? (data as Experience) : e)));
+    setExperiences(prev => prev.map(e => (e.id === id ? (data as Experience) : e)));
+  };
+
+  // Batched insert/update for the resume-import review flow: awaits every
+  // write sequentially (so it never races against a stale `experiences`
+  // closure like a fire-and-forget forEach would) and folds all results
+  // into a single functional state update at the end.
+  const handleImportExperiences = async (actions: ImportExperienceAction[]) => {
+    if (!session) return;
+
+    const insertedRows: Experience[] = [];
+    const updatedRows: Record<string, Experience> = {};
+
+    for (const action of actions) {
+      if (action.type === "insert") {
+        const { data, error } = await supabase
+          .from("experiences")
+          .insert({ ...action.data, user_id: session.user.id })
+          .select()
+          .single();
+        if (error) {
+          alert(error.message);
+          continue;
+        }
+        insertedRows.push(data as Experience);
+      } else {
+        const { data, error } = await supabase
+          .from("experiences")
+          .update(action.data)
+          .eq("id", action.id)
+          .select()
+          .single();
+        if (error) {
+          alert(error.message);
+          continue;
+        }
+        updatedRows[action.id] = data as Experience;
+      }
+    }
+
+    setExperiences(prev => {
+      const withUpdates = prev.map(e => (updatedRows[e.id] ? updatedRows[e.id] : e));
+      return [...insertedRows, ...withUpdates];
+    });
   };
 
   const handleDeleteExperience = async (id: string) => {
@@ -521,6 +564,7 @@ export default function App() {
                 onAddExperience={handleAddExperience}
                 onDeleteExperience={handleDeleteExperience}
                 onUpdateExperience={handleUpdateExperience}
+                onImportExperiences={handleImportExperiences}
               />
             )}
 

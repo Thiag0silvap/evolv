@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { Experience, Project, CategoryType } from "../types";
+import { Experience, Project, CategoryType, ImportExperienceAction } from "../types";
 import ImportResume from "./ImportResume";
+import { authFetch } from "../lib/authFetch";
 import { 
   Sparkles, 
   Trash2, 
@@ -26,6 +27,7 @@ interface ExperiencesProps {
   onAddExperience: (exp: Omit<Experience, "id">) => void;
   onDeleteExperience: (id: string) => void;
   onUpdateExperience: (exp: Experience) => void;
+  onImportExperiences: (actions: ImportExperienceAction[]) => Promise<void>;
 }
 
 const CATEGORIES: CategoryType[] = [
@@ -40,12 +42,13 @@ const CATEGORIES: CategoryType[] = [
 
 const CUSTOM_PROJECT_OPTION = "__custom__";
 
-export default function Experiences({ 
-  experiences, 
-  projects, 
-  onAddExperience, 
-  onDeleteExperience, 
-  onUpdateExperience 
+export default function Experiences({
+  experiences,
+  projects,
+  onAddExperience,
+  onDeleteExperience,
+  onUpdateExperience,
+  onImportExperiences
 }: ExperiencesProps) {
   // Form State
   const [description, setDescription] = useState("");
@@ -90,7 +93,7 @@ export default function Experiences({
         ? projects.find(p => p.name === project)
         : undefined;
 
-      const response = await fetch("/api/gemini/suggest", {
+      const response = await authFetch("/api/gemini/suggest", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -253,7 +256,7 @@ export default function Experiences({
       
       {/* Left Column: Log Daily Experience Form */}
       <div className="xl:col-span-5 space-y-6">
-        <ImportResume onAddExperience={onAddExperience} />
+        <ImportResume experiences={experiences} onImportExperiences={onImportExperiences} />
 
         <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-850 space-y-6 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-brand-blue/5 rounded-full blur-2xl pointer-events-none"></div>
